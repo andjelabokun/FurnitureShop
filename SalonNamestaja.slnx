@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SalonNamestaja.Domain/SalonNamestaja.Domain.csproj" />
+  <Project Path="SalonNamestaja/SalonNamestajaAPI.csproj" />
+</Solution>
