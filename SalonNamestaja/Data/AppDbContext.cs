@@ -26,7 +26,12 @@ namespace SalonNamestajaAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // specijalizacija - TPH strategija
+            modelBuilder.Entity<Proizvod>()
+                .HasOne(p => p.Dimenzije)
+                .WithOne(d => d.Proizvod)
+                .HasForeignKey<Dimenzije>(d => d.ProizvodID);
+                
+
             modelBuilder.Entity<Proizvod>()
                 .HasDiscriminator<string>("TipProizvoda")
                 .HasValue<Proizvod>("Proizvod")
@@ -34,6 +39,11 @@ namespace SalonNamestajaAPI.Data
                 .HasValue<Orman>("Orman")
                 .HasValue<Krevet>("Krevet")
                 .HasValue<Sto>("Sto");
+
+            modelBuilder.Entity<StavkaPorudzbine>()
+                .HasKey(s => s.StavkaPorudzbinaID);
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
