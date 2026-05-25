@@ -11,9 +11,8 @@ namespace SalonNamestaja.Domain
         public string Opis { get; set; }
         public double Cena { get; set; }
         public int StanjeNaLageru { get; set; }
-        public double Sirina { get; set; }
-        public double Visina { get; set; }
-        public double Dubina { get; set; }
+        public int DimenzijeID { get; set; }
+        public Dimenzije Dimenzije { get; set; }
 
         public int PodkategorijaID { get; set; }
         public Podkategorija Podkategorija { get; set; }
