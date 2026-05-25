@@ -15,7 +15,7 @@ namespace SalonNamestaja.Domain
         public Dimenzije Dimenzije { get; set; }
 
         public int PodkategorijaID { get; set; }
-        public Podkategorija Podkategorija { get; set; }
+        public PodKategorija Podkategorija { get; set; }
 
         public int MaterijalID { get; set; }
         public Materijal Materijal { get; set; }
