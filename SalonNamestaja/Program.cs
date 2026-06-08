@@ -1,10 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using SalonNamestajaAPI.Data;
 using Scalar.AspNetCore;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
