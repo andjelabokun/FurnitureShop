@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="SalonNamestaja.Domain/SalonNamestaja.Domain.csproj" />
+  <Project Path="SalonNamestaja.Infrastructure/SalonNamestaja.Infrastructure.csproj" Id="3cac4a2f-fcbe-41fb-b6fe-0bddc113f7da" />
   <Project Path="SalonNamestaja/SalonNamestajaAPI.csproj" />
 </Solution>
