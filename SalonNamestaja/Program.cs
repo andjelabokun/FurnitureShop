@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using SalonNamestaja.Domain.Repositories;
 using SalonNamestaja.Infrastructure;
 using SalonNamestaja.Infrastructure.Data;
@@ -7,6 +9,10 @@ using SalonNamestaja.Infrastructure.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
