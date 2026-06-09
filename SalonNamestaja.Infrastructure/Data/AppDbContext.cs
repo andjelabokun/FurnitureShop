@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
 
-namespace SalonNamestajaAPI.Data
+namespace SalonNamestaja.Infrastructure.Data
 {
     public class AppDbContext : DbContext
     {
@@ -47,3 +47,4 @@ namespace SalonNamestajaAPI.Data
         }
     }
 }
+

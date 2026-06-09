@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestajaAPI.Data;
+using SalonNamestaja.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
 using SalonNamestajaAPI.DTOs;

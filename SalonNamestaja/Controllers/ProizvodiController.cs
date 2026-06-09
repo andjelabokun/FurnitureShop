@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestajaAPI.Data;
+using SalonNamestaja.Infrastructure.Data;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers
