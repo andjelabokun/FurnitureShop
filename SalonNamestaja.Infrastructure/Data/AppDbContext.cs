@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
+using SalonNamestaja.Infrastructure.Identity;
 
 namespace SalonNamestaja.Infrastructure.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -26,6 +28,8 @@ namespace SalonNamestaja.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Proizvod>()
                 .HasOne(p => p.Dimenzije)
                 .WithOne(d => d.Proizvod)
@@ -43,7 +47,7 @@ namespace SalonNamestaja.Infrastructure.Data
             modelBuilder.Entity<StavkaPorudzbine>()
                 .HasKey(s => s.StavkaPorudzbinaID);
 
-            base.OnModelCreating(modelBuilder);
+            
         }
     }
 }
