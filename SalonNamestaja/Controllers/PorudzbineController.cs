@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestaja.Infrastructure.Data;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers;
@@ -10,39 +9,33 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class PorudzbineController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public PorudzbineController(AppDbContext context)
+    public PorudzbineController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
-        var porudzbine = await _context.Porudzbine
-            .Include(p => p.Kupac)
-            .Include(p => p.Prodavac)
-            .Include(p => p.StavkePorudzbine)
-            .ToListAsync();
+        var porudzbine = _unitOfWork.Porudzbine.GetAll();
         return Ok(porudzbine);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
-        var porudzbina = await _context.Porudzbine
-            .Include(p => p.Kupac)
-            .Include(p => p.Prodavac)
-            .Include(p => p.StavkePorudzbine)
-            .FirstOrDefaultAsync(p => p.PorudzbinaID == id);
+        var porudzbina = _unitOfWork.Porudzbine.GetById(id);
+
         if (porudzbina == null)
             return NotFound("Porudžbina nije pronađena.");
+
         return Ok(porudzbina);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(PorudzbinaCreateDto dto)
+    public IActionResult Create(PorudzbinaCreateDto dto)
     {
         var porudzbina = new Porudzbina
         {
@@ -52,33 +45,40 @@ public class PorudzbineController : ControllerBase
             KupacID = dto.KupacID,
             ProdavacID = dto.ProdavacID
         };
-        _context.Porudzbine.Add(porudzbina);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Porudzbine.Add(porudzbina);
+        _unitOfWork.SaveChanges();
+
         return Ok(porudzbina);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, PorudzbinaCreateDto dto)
+    public IActionResult Update(int id, PorudzbinaUpdateDto dto)
     {
-        var porudzbina = await _context.Porudzbine.FindAsync(id);
+        var porudzbina = _unitOfWork.Porudzbine.GetById(id);
+
         if (porudzbina == null)
             return NotFound("Porudžbina nije pronađena.");
+
         porudzbina.Status = dto.Status;
-        porudzbina.UkupanIznos = dto.UkupanIznos;
-        porudzbina.KupacID = dto.KupacID;
-        porudzbina.ProdavacID = dto.ProdavacID;
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Porudzbine.Update(porudzbina);
+        _unitOfWork.SaveChanges();
+
         return Ok(porudzbina);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
-        var porudzbina = await _context.Porudzbine.FindAsync(id);
+        var porudzbina = _unitOfWork.Porudzbine.GetById(id);
+
         if (porudzbina == null)
             return NotFound("Porudžbina nije pronađena.");
-        _context.Porudzbine.Remove(porudzbina);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Porudzbine.Remove(porudzbina);
+        _unitOfWork.SaveChanges();
+
         return Ok("Porudžbina uspešno obrisana.");
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestaja.Infrastructure.Data;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers;
@@ -10,62 +9,74 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class ProizvodjaciController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ProizvodjaciController(AppDbContext context)
+    public ProizvodjaciController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
-        var proizvodjaci = await _context.Proizvodjaci.ToListAsync();
+        var proizvodjaci = _unitOfWork.Proizvodjaci.GetAll();
         return Ok(proizvodjaci);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
-        var proizvodjac = await _context.Proizvodjaci.FindAsync(id);
+        var proizvodjac = _unitOfWork.Proizvodjaci.GetById(id);
+
         if (proizvodjac == null)
             return NotFound("Proizvođač nije pronađen.");
+
         return Ok(proizvodjac);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ProizvodjacDto dto)
+    public IActionResult Create(ProizvodjacDto dto)
     {
         var proizvodjac = new Proizvodjac
         {
             Naziv = dto.Naziv,
             Drzava = dto.Drzava
         };
-        _context.Proizvodjaci.Add(proizvodjac);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Proizvodjaci.Add(proizvodjac);
+        _unitOfWork.SaveChanges();
+
         return Ok(proizvodjac);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ProizvodjacDto dto)
+    public IActionResult Update(int id, ProizvodjacDto dto)
     {
-        var proizvodjac = await _context.Proizvodjaci.FindAsync(id);
+        var proizvodjac = _unitOfWork.Proizvodjaci.GetById(id);
+
         if (proizvodjac == null)
             return NotFound("Proizvođač nije pronađen.");
+
         proizvodjac.Naziv = dto.Naziv;
         proizvodjac.Drzava = dto.Drzava;
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Proizvodjaci.Update(proizvodjac);
+        _unitOfWork.SaveChanges();
+
         return Ok(proizvodjac);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
-        var proizvodjac = await _context.Proizvodjaci.FindAsync(id);
+        var proizvodjac = _unitOfWork.Proizvodjaci.GetById(id);
+
         if (proizvodjac == null)
             return NotFound("Proizvođač nije pronađen.");
-        _context.Proizvodjaci.Remove(proizvodjac);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Proizvodjaci.Remove(proizvodjac);
+        _unitOfWork.SaveChanges();
+
         return Ok("Proizvođač uspešno obrisan.");
     }
 }

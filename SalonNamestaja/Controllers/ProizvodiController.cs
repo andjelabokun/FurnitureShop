@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestaja.Infrastructure.Data;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers
@@ -10,39 +9,40 @@ namespace SalonNamestajaAPI.Controllers
     [Route("api/[controller]")]
     public class ProizvodiController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProizvodiController(AppDbContext context)
+        public ProizvodiController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
-        // GET: api/proizvodi
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public IActionResult GetAll()
         {
-            var proizvodi = await _context.Proizvodi.ToListAsync();
-
+            var proizvodi = _unitOfWork.Proizvodi.GetAll();
             return Ok(proizvodi);
         }
 
-        // GET: api/proizvodi/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public IActionResult GetById(int id)
         {
-            var proizvod = await _context.Proizvodi.FindAsync(id);
+            var proizvod = _unitOfWork.Proizvodi.GetById(id);
 
             if (proizvod == null)
-            {
                 return NotFound("Proizvod nije pronađen.");
-            }
 
             return Ok(proizvod);
         }
 
-        // POST: api/proizvodi
+        [HttpGet("boja/{bojaId}")]
+        public IActionResult GetPoBoji(int bojaId)
+        {
+            var proizvodi = _unitOfWork.Proizvodi.GetSviBojom(bojaId);
+            return Ok(proizvodi);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Create(ProizvodCreateDto dto)
+        public IActionResult Create(ProizvodCreateDto dto)
         {
             var proizvod = new Proizvod
             {
@@ -50,7 +50,6 @@ namespace SalonNamestajaAPI.Controllers
                 Opis = dto.Opis,
                 Cena = dto.Cena,
                 StanjeNaLageru = dto.StanjeNaLageru,
-
                 PodkategorijaID = dto.PodkategorijaId,
                 MaterijalID = dto.MaterijalId,
                 BojaID = dto.BojaId,
@@ -58,54 +57,45 @@ namespace SalonNamestajaAPI.Controllers
                 ProizvodjacID = dto.ProizvodjacId
             };
 
-            _context.Proizvodi.Add(proizvod);
-
-            await _context.SaveChangesAsync();
+            _unitOfWork.Proizvodi.Add(proizvod);
+            _unitOfWork.SaveChanges();
 
             return Ok(proizvod);
         }
 
-        // PUT: api/proizvodi/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, ProizvodCreateDto dto)
+        public IActionResult Update(int id, ProizvodUpdateDto dto)
         {
-            var proizvod = await _context.Proizvodi.FindAsync(id);
+            var proizvod = _unitOfWork.Proizvodi.GetById(id);
 
             if (proizvod == null)
-            {
                 return NotFound("Proizvod nije pronađen.");
-            }
 
             proizvod.Naziv = dto.Naziv;
             proizvod.Opis = dto.Opis;
             proizvod.Cena = dto.Cena;
             proizvod.StanjeNaLageru = dto.StanjeNaLageru;
-
             proizvod.PodkategorijaID = dto.PodkategorijaId;
             proizvod.MaterijalID = dto.MaterijalId;
             proizvod.BojaID = dto.BojaId;
             proizvod.DimenzijeID = dto.DimenzijeId;
-            proizvod.ProizvodjacID = dto.ProizvodjacId;
 
-            await _context.SaveChangesAsync();
+            _unitOfWork.Proizvodi.Update(proizvod);
+            _unitOfWork.SaveChanges();
 
             return Ok(proizvod);
         }
 
-        // DELETE: api/proizvodi/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var proizvod = await _context.Proizvodi.FindAsync(id);
+            var proizvod = _unitOfWork.Proizvodi.GetById(id);
 
             if (proizvod == null)
-            {
                 return NotFound("Proizvod nije pronađen.");
-            }
 
-            _context.Proizvodi.Remove(proizvod);
-
-            await _context.SaveChangesAsync();
+            _unitOfWork.Proizvodi.Remove(proizvod);
+            _unitOfWork.SaveChanges();
 
             return Ok("Proizvod uspešno obrisan.");
         }

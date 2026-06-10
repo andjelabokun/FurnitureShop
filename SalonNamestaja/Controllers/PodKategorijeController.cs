@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestaja.Infrastructure.Data;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers;
@@ -10,62 +9,74 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class PodKategorijeController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public PodKategorijeController(AppDbContext context)
+    public PodKategorijeController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
-        var podkategorije = await _context.PodKategorije.ToListAsync();
+        var podkategorije = _unitOfWork.PodKategorije.GetAll();
         return Ok(podkategorije);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
-        var podkategorija = await _context.PodKategorije.FindAsync(id);
+        var podkategorija = _unitOfWork.PodKategorije.GetById(id);
+
         if (podkategorija == null)
             return NotFound("Podkategorija nije pronađena.");
+
         return Ok(podkategorija);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(PodkategorijaCreateDto dto)
+    public IActionResult Create(PodkategorijaCreateDto dto)
     {
         var podkategorija = new PodKategorija
         {
             Naziv = dto.Naziv,
             KategorijaID = dto.KategorijaID
         };
-        _context.PodKategorije.Add(podkategorija);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.PodKategorije.Add(podkategorija);
+        _unitOfWork.SaveChanges();
+
         return Ok(podkategorija);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, PodkategorijaCreateDto dto)
+    public IActionResult Update(int id, PodkategorijaUpdateDto dto)
     {
-        var podkategorija = await _context.PodKategorije.FindAsync(id);
+        var podkategorija = _unitOfWork.PodKategorije.GetById(id);
+
         if (podkategorija == null)
             return NotFound("Podkategorija nije pronađena.");
+
         podkategorija.Naziv = dto.Naziv;
-        podkategorija.KategorijaID = dto.KategorijaID;
-        await _context.SaveChangesAsync();
+        podkategorija.KategorijaID = dto.KategorijaId;
+
+        _unitOfWork.PodKategorije.Update(podkategorija);
+        _unitOfWork.SaveChanges();
+
         return Ok(podkategorija);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
-        var podkategorija = await _context.PodKategorije.FindAsync(id);
+        var podkategorija = _unitOfWork.PodKategorije.GetById(id);
+
         if (podkategorija == null)
             return NotFound("Podkategorija nije pronađena.");
-        _context.PodKategorije.Remove(podkategorija);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.PodKategorije.Remove(podkategorija);
+        _unitOfWork.SaveChanges();
+
         return Ok("Podkategorija uspešno obrisana.");
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestaja.Infrastructure.Data;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers;
@@ -10,62 +9,74 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class MaterijalController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public MaterijalController(AppDbContext context)
+    public MaterijalController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
-        var materijali = await _context.Materijali.ToListAsync();
+        var materijali = _unitOfWork.Materijali.GetAll();
         return Ok(materijali);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
-        var materijal = await _context.Materijali.FindAsync(id);
+        var materijal = _unitOfWork.Materijali.GetById(id);
+
         if (materijal == null)
             return NotFound("Materijal nije pronađen.");
+
         return Ok(materijal);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(MaterijalDto dto)
+    public IActionResult Create(MaterijalDto dto)
     {
         var materijal = new Materijal
         {
             Naziv = dto.Naziv,
             Tip = dto.Tip
         };
-        _context.Materijali.Add(materijal);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Materijali.Add(materijal);
+        _unitOfWork.SaveChanges();
+
         return Ok(materijal);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, MaterijalDto dto)
+    public IActionResult Update(int id, MaterijalDto dto)
     {
-        var materijal = await _context.Materijali.FindAsync(id);
+        var materijal = _unitOfWork.Materijali.GetById(id);
+
         if (materijal == null)
             return NotFound("Materijal nije pronađen.");
+
         materijal.Naziv = dto.Naziv;
         materijal.Tip = dto.Tip;
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Materijali.Update(materijal);
+        _unitOfWork.SaveChanges();
+
         return Ok(materijal);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
-        var materijal = await _context.Materijali.FindAsync(id);
+        var materijal = _unitOfWork.Materijali.GetById(id);
+
         if (materijal == null)
             return NotFound("Materijal nije pronađen.");
-        _context.Materijali.Remove(materijal);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Materijali.Remove(materijal);
+        _unitOfWork.SaveChanges();
+
         return Ok("Materijal uspešno obrisan.");
     }
 }

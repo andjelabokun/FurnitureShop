@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestaja.Infrastructure.Data;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers;
@@ -10,60 +9,72 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class BojeController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public BojeController(AppDbContext context)
+    public BojeController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
-        var boje = await _context.Boje.ToListAsync();
+        var boje = _unitOfWork.Boje.GetAll();
         return Ok(boje);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
-        var boja = await _context.Boje.FindAsync(id);
+        var boja = _unitOfWork.Boje.GetById(id);
+
         if (boja == null)
             return NotFound("Boja nije pronađena.");
+
         return Ok(boja);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(BojaDto dto)
+    public IActionResult Create(BojaDto dto)
     {
         var boja = new Boja
         {
             Naziv = dto.Naziv
         };
-        _context.Boje.Add(boja);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Boje.Add(boja);
+        _unitOfWork.SaveChanges();
+
         return Ok(boja);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, BojaDto dto)
+    public IActionResult Update(int id, BojaDto dto)
     {
-        var boja = await _context.Boje.FindAsync(id);
+        var boja = _unitOfWork.Boje.GetById(id);
+
         if (boja == null)
             return NotFound("Boja nije pronađena.");
+
         boja.Naziv = dto.Naziv;
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Boje.Update(boja);
+        _unitOfWork.SaveChanges();
+
         return Ok(boja);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
-        var boja = await _context.Boje.FindAsync(id);
+        var boja = _unitOfWork.Boje.GetById(id);
+
         if (boja == null)
             return NotFound("Boja nije pronađena.");
-        _context.Boje.Remove(boja);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Boje.Remove(boja);
+        _unitOfWork.SaveChanges();
+
         return Ok("Boja uspešno obrisana.");
     }
 }

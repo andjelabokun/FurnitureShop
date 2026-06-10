@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
-using SalonNamestaja.Infrastructure.Data;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers;
@@ -10,31 +9,33 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class KupciController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public KupciController(AppDbContext context)
+    public KupciController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
-        var kupci = await _context.Kupci.ToListAsync();
+        var kupci = _unitOfWork.Kupci.GetAll();
         return Ok(kupci);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
-        var kupac = await _context.Kupci.FindAsync(id);
+        var kupac = _unitOfWork.Kupci.GetById(id);
+
         if (kupac == null)
             return NotFound("Kupac nije pronađen.");
+
         return Ok(kupac);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(KupacCreateDto dto)
+    public IActionResult Create(KupacCreateDto dto)
     {
         var kupac = new Kupac
         {
@@ -45,35 +46,43 @@ public class KupciController : ControllerBase
             TipKupca = dto.TipKupca,
             PIB = dto.PIB
         };
-        _context.Kupci.Add(kupac);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Kupci.Add(kupac);
+        _unitOfWork.SaveChanges();
+
         return Ok(kupac);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, KupacCreateDto dto)
+    public IActionResult Update(int id, KupacUpdateDto dto)
     {
-        var kupac = await _context.Kupci.FindAsync(id);
+        var kupac = _unitOfWork.Kupci.GetById(id);
+
         if (kupac == null)
             return NotFound("Kupac nije pronađen.");
+
         kupac.Ime = dto.Ime;
         kupac.Prezime = dto.Prezime;
         kupac.Email = dto.Email;
         kupac.Telefon = dto.Telefon;
-        kupac.TipKupca = dto.TipKupca;
-        kupac.PIB = dto.PIB;
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Kupci.Update(kupac);
+        _unitOfWork.SaveChanges();
+
         return Ok(kupac);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
-        var kupac = await _context.Kupci.FindAsync(id);
+        var kupac = _unitOfWork.Kupci.GetById(id);
+
         if (kupac == null)
             return NotFound("Kupac nije pronađen.");
-        _context.Kupci.Remove(kupac);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Kupci.Remove(kupac);
+        _unitOfWork.SaveChanges();
+
         return Ok("Kupac uspešno obrisan.");
     }
 }

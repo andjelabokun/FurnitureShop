@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using SalonNamestaja.Domain;
+using SalonNamestaja.Domain.Repositories;
 using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Controllers;
@@ -10,60 +9,83 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class KategorijeController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public KategorijeController(AppDbContext context)
+    public KategorijeController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
-        var kategorije = await _context.Kategorije.ToListAsync();
+        var kategorije = _unitOfWork.Kategorije.GetAll();
         return Ok(kategorije);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
-        var kategorija = await _context.Kategorije.FindAsync(id);
+        var kategorija = _unitOfWork.Kategorije.GetById(id);
+
         if (kategorija == null)
             return NotFound("Kategorija nije pronađena.");
+
+        return Ok(kategorija);
+    }
+
+    [HttpGet("{id}/podkategorije")]
+    public IActionResult GetByIdSaPodkategorijama(int id)
+    {
+        var kategorija = _unitOfWork.Kategorije.GetByIdSaPodkategorijama(id);
+
+        if (kategorija == null)
+            return NotFound("Kategorija nije pronađena.");
+
         return Ok(kategorija);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(KategorijaCreateDto dto)
+    public IActionResult Create(KategorijaCreateDto dto)
     {
         var kategorija = new Kategorija
         {
             Naziv = dto.Naziv
         };
-        _context.Kategorije.Add(kategorija);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Kategorije.Add(kategorija);
+        _unitOfWork.SaveChanges();
+
         return Ok(kategorija);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, KategorijaCreateDto dto)
+    public IActionResult Update(int id, KategorijaUpdateDto dto)
     {
-        var kategorija = await _context.Kategorije.FindAsync(id);
+        var kategorija = _unitOfWork.Kategorije.GetById(id);
+
         if (kategorija == null)
             return NotFound("Kategorija nije pronađena.");
+
         kategorija.Naziv = dto.Naziv;
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Kategorije.Update(kategorija);
+        _unitOfWork.SaveChanges();
+
         return Ok(kategorija);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
-        var kategorija = await _context.Kategorije.FindAsync(id);
+        var kategorija = _unitOfWork.Kategorije.GetById(id);
+
         if (kategorija == null)
             return NotFound("Kategorija nije pronađena.");
-        _context.Kategorije.Remove(kategorija);
-        await _context.SaveChangesAsync();
+
+        _unitOfWork.Kategorije.Remove(kategorija);
+        _unitOfWork.SaveChanges();
+
         return Ok("Kategorija uspešno obrisana.");
     }
 }
