@@ -26,6 +26,8 @@ namespace SalonNamestaja.Domain
         public int ProizvodjacID { get; set; }
         public Proizvodjac Proizvodjac { get; set; }
 
+        public string? SlikaUrl { get; set; }
+
         public ICollection<StavkaPorudzbine> StavkePorudzbine { get; set; }
     }
 }

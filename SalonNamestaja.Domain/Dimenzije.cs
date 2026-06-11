@@ -11,7 +11,6 @@ namespace SalonNamestaja.Domain
         public double Visina { get; set; }
         public double Dubina { get; set; }
 
-        public int ProizvodID { get; set; }
-        public Proizvod Proizvod { get; set; }
+        public ICollection<Proizvod> Proizvodi { get; set; }
     }
 }

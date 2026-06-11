@@ -12,6 +12,7 @@
         public int BojaId { get; set; }
         public int DimenzijeId { get; set; }
         public int ProizvodjacId { get; set; }
+        public string? SlikaUrl { get; set; }
     }
 }
 

@@ -18,6 +18,7 @@ namespace SalonNamestaja.Infrastructure
         private IRepository<Materijal>? _materijali;
         private IRepository<Proizvodjac>? _proizvodjaci;
         private IRepository<Porudzbina>? _porudzbine;
+        private IRepository<Dimenzije>? _dimenzije;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -50,6 +51,9 @@ namespace SalonNamestaja.Infrastructure
 
         public IRepository<Porudzbina> Porudzbine =>
             _porudzbine ??= new Repository<Porudzbina>(_context);
+
+        public IRepository<Dimenzije> Dimenzije =>
+            _dimenzije ??= new Repository<Dimenzije>(_context);
 
         public int SaveChanges() => _context.SaveChanges();
 

@@ -54,7 +54,8 @@ namespace SalonNamestajaAPI.Controllers
                 MaterijalID = dto.MaterijalId,
                 BojaID = dto.BojaId,
                 DimenzijeID = dto.DimenzijeId,
-                ProizvodjacID = dto.ProizvodjacId
+                ProizvodjacID = dto.ProizvodjacId,
+                SlikaUrl = dto.SlikaUrl
             };
 
             _unitOfWork.Proizvodi.Add(proizvod);
@@ -79,6 +80,7 @@ namespace SalonNamestajaAPI.Controllers
             proizvod.MaterijalID = dto.MaterijalId;
             proizvod.BojaID = dto.BojaId;
             proizvod.DimenzijeID = dto.DimenzijeId;
+            proizvod.SlikaUrl = dto.SlikaUrl;
 
             _unitOfWork.Proizvodi.Update(proizvod);
             _unitOfWork.SaveChanges();

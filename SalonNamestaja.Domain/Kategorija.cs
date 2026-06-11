@@ -4,6 +4,7 @@
     {
         public int KategorijaID { get; set; }
         public string Naziv { get; set; }
+        public string? SlikaUrl { get; set; }
 
         public ICollection<PodKategorija> Podkategorije { get; set; }
     }

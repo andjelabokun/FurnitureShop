@@ -49,9 +49,13 @@ public class KategorijeController : ControllerBase
     public IActionResult Create(KategorijaCreateDto dto)
     {
         var kategorija = new Kategorija
+
         {
-            Naziv = dto.Naziv
+            Naziv = dto.Naziv,
+            SlikaUrl = dto.SlikaUrl
         };
+
+
 
         _unitOfWork.Kategorije.Add(kategorija);
         _unitOfWork.SaveChanges();
@@ -68,6 +72,7 @@ public class KategorijeController : ControllerBase
             return NotFound("Kategorija nije pronađena.");
 
         kategorija.Naziv = dto.Naziv;
+        kategorija.SlikaUrl = dto.SlikaUrl;
 
         _unitOfWork.Kategorije.Update(kategorija);
         _unitOfWork.SaveChanges();

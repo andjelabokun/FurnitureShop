@@ -30,10 +30,7 @@ namespace SalonNamestaja.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Proizvod>()
-                .HasOne(p => p.Dimenzije)
-                .WithOne(d => d.Proizvod)
-                .HasForeignKey<Dimenzije>(d => d.ProizvodID);
+            
                 
 
             modelBuilder.Entity<Proizvod>()

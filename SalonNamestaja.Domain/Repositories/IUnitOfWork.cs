@@ -15,6 +15,7 @@ namespace SalonNamestaja.Domain.Repositories
         IRepository<Materijal> Materijali { get; }
         IRepository<Proizvodjac> Proizvodjaci { get; }
         IRepository<Porudzbina> Porudzbine { get; }
+        IRepository<Dimenzije> Dimenzije { get; }
 
         int SaveChanges();
     }
