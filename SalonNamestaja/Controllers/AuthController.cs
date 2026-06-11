@@ -35,9 +35,11 @@ namespace SalonNamestajaAPI.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
-
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
+
+            
+            await _userManager.AddToRoleAsync(user, "Kupac");
 
             return Ok("Registracija uspešna.");
         }
