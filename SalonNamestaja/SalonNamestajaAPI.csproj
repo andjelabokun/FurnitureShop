@@ -29,9 +29,4 @@
     <ProjectReference Include="..\SalonNamestaja.Infrastructure\SalonNamestaja.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Kategorije\Commands\" />
-    <Folder Include="Features\Kategorije\Queries\" />
-  </ItemGroup>
-
 </Project>

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Domain;
-using SalonNamestaja.Domain.Repositories;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SalonNamestajaAPI.DTOs;
+using SalonNamestajaAPI.Features.Kategorije.Commands;
+using SalonNamestajaAPI.Features.Kategorije.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
@@ -9,24 +11,24 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class KategorijeController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
 
-    public KategorijeController(IUnitOfWork unitOfWork)
+    public KategorijeController(IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var kategorije = _unitOfWork.Kategorije.GetAll();
+        var kategorije = await _mediator.Send(new GetAllKategorijeQuery());
         return Ok(kategorije);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var kategorija = _unitOfWork.Kategorije.GetById(id);
+        var kategorija = await _mediator.Send(new GetKategorijaByIdQuery(id));
 
         if (kategorija == null)
             return NotFound("Kategorija nije pronađena.");
@@ -35,9 +37,9 @@ public class KategorijeController : ControllerBase
     }
 
     [HttpGet("{id}/podkategorije")]
-    public IActionResult GetByIdSaPodkategorijama(int id)
+    public async Task<IActionResult> GetByIdSaPodkategorijama(int id)
     {
-        var kategorija = _unitOfWork.Kategorije.GetByIdSaPodkategorijama(id);
+        var kategorija = await _mediator.Send(new GetKategorijaSaPodkategorijamaQuery(id));
 
         if (kategorija == null)
             return NotFound("Kategorija nije pronađena.");
@@ -45,51 +47,34 @@ public class KategorijeController : ControllerBase
         return Ok(kategorija);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
-    public IActionResult Create(KategorijaCreateDto dto)
+    public async Task<IActionResult> Create(KategorijaCreateDto dto)
     {
-        var kategorija = new Kategorija
-
-        {
-            Naziv = dto.Naziv,
-            SlikaUrl = dto.SlikaUrl
-        };
-
-
-
-        _unitOfWork.Kategorije.Add(kategorija);
-        _unitOfWork.SaveChanges();
-
+        var kategorija = await _mediator.Send(new CreateKategorijaCommand(dto));
         return Ok(kategorija);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    public IActionResult Update(int id, KategorijaUpdateDto dto)
+    public async Task<IActionResult> Update(int id, KategorijaUpdateDto dto)
     {
-        var kategorija = _unitOfWork.Kategorije.GetById(id);
+        var kategorija = await _mediator.Send(new UpdateKategorijaCommand(id, dto));
 
         if (kategorija == null)
             return NotFound("Kategorija nije pronađena.");
-
-        kategorija.Naziv = dto.Naziv;
-        kategorija.SlikaUrl = dto.SlikaUrl;
-
-        _unitOfWork.Kategorije.Update(kategorija);
-        _unitOfWork.SaveChanges();
 
         return Ok(kategorija);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var kategorija = _unitOfWork.Kategorije.GetById(id);
+        var obrisana = await _mediator.Send(new DeleteKategorijaCommand(id));
 
-        if (kategorija == null)
+        if (!obrisana)
             return NotFound("Kategorija nije pronađena.");
-
-        _unitOfWork.Kategorije.Remove(kategorija);
-        _unitOfWork.SaveChanges();
 
         return Ok("Kategorija uspešno obrisana.");
     }
