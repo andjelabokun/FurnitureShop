@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Domain;
-using SalonNamestaja.Domain.Repositories;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SalonNamestajaAPI.DTOs;
+using SalonNamestajaAPI.Features.Prodavci.Commands;
+using SalonNamestajaAPI.Features.Prodavci.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
@@ -9,24 +11,26 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class ProdavciController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
 
-    public ProdavciController(IUnitOfWork unitOfWork)
+    public ProdavciController(IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
+        _mediator = mediator;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var prodavci = _unitOfWork.Prodavci.GetAll();
+        var prodavci = await _mediator.Send(new GetAllProdavciQuery());
         return Ok(prodavci);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var prodavac = _unitOfWork.Prodavci.GetById(id);
+        var prodavac = await _mediator.Send(new GetProdavacByIdQuery(id));
 
         if (prodavac == null)
             return NotFound("Prodavac nije pronađen.");
@@ -34,51 +38,34 @@ public class ProdavciController : ControllerBase
         return Ok(prodavac);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
-    public IActionResult Create(ProdavacCreateDto dto)
+    public async Task<IActionResult> Create(ProdavacCreateDto dto)
     {
-        var prodavac = new Prodavac
-        {
-            Ime = dto.Ime,
-            Prezime = dto.Prezime,
-            KorisnickoIme = dto.KorisnickoIme,
-            Lozinka = dto.Lozinka
-        };
-
-        _unitOfWork.Prodavci.Add(prodavac);
-        _unitOfWork.SaveChanges();
-
+        var prodavac = await _mediator.Send(new CreateProdavacCommand(dto));
         return Ok(prodavac);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    public IActionResult Update(int id, ProdavacUpdateDto dto)
+    public async Task<IActionResult> Update(int id, ProdavacUpdateDto dto)
     {
-        var prodavac = _unitOfWork.Prodavci.GetById(id);
+        var prodavac = await _mediator.Send(new UpdateProdavacCommand(id, dto));
 
         if (prodavac == null)
             return NotFound("Prodavac nije pronađen.");
-
-        prodavac.Ime = dto.Ime;
-        prodavac.Prezime = dto.Prezime;
-        prodavac.KorisnickoIme = dto.KorisnickoIme;
-
-        _unitOfWork.Prodavci.Update(prodavac);
-        _unitOfWork.SaveChanges();
 
         return Ok(prodavac);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var prodavac = _unitOfWork.Prodavci.GetById(id);
+        var obrisan = await _mediator.Send(new DeleteProdavacCommand(id));
 
-        if (prodavac == null)
+        if (!obrisan)
             return NotFound("Prodavac nije pronađen.");
-
-        _unitOfWork.Prodavci.Remove(prodavac);
-        _unitOfWork.SaveChanges();
 
         return Ok("Prodavac uspešno obrisan.");
     }
