@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Domain;
-using SalonNamestaja.Domain.Repositories;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SalonNamestajaAPI.DTOs;
+using SalonNamestajaAPI.Features.Porudzbine.Commands;
+using SalonNamestajaAPI.Features.Porudzbine.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
@@ -9,24 +11,26 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class PorudzbineController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
 
-    public PorudzbineController(IUnitOfWork unitOfWork)
+    public PorudzbineController(IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
+        _mediator = mediator;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var porudzbine = _unitOfWork.Porudzbine.GetAll();
+        var porudzbine = await _mediator.Send(new GetAllPorudzbineQuery());
         return Ok(porudzbine);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var porudzbina = _unitOfWork.Porudzbine.GetById(id);
+        var porudzbina = await _mediator.Send(new GetPorudzbinaByIdQuery(id));
 
         if (porudzbina == null)
             return NotFound("Porudžbina nije pronađena.");
@@ -34,50 +38,34 @@ public class PorudzbineController : ControllerBase
         return Ok(porudzbina);
     }
 
+    [Authorize]
     [HttpPost]
-    public IActionResult Create(PorudzbinaCreateDto dto)
+    public async Task<IActionResult> Create(PorudzbinaCreateDto dto)
     {
-        var porudzbina = new Porudzbina
-        {
-            DatumVreme = DateTime.Now,
-            Status = "Kreirana",
-            UkupanIznos = dto.UkupanIznos,
-            KupacID = dto.KupacID,
-            ProdavacID = dto.ProdavacID
-        };
-
-        _unitOfWork.Porudzbine.Add(porudzbina);
-        _unitOfWork.SaveChanges();
-
+        var porudzbina = await _mediator.Send(new CreatePorudzbinaCommand(dto));
         return Ok(porudzbina);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    public IActionResult Update(int id, PorudzbinaUpdateDto dto)
+    public async Task<IActionResult> Update(int id, PorudzbinaCreateDto dto)
     {
-        var porudzbina = _unitOfWork.Porudzbine.GetById(id);
+        var porudzbina = await _mediator.Send(new UpdatePorudzbinaCommand(id, dto));
 
         if (porudzbina == null)
             return NotFound("Porudžbina nije pronađena.");
-
-        porudzbina.Status = dto.Status;
-
-        _unitOfWork.Porudzbine.Update(porudzbina);
-        _unitOfWork.SaveChanges();
 
         return Ok(porudzbina);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var porudzbina = _unitOfWork.Porudzbine.GetById(id);
+        var obrisana = await _mediator.Send(new DeletePorudzbinaCommand(id));
 
-        if (porudzbina == null)
+        if (!obrisana)
             return NotFound("Porudžbina nije pronađena.");
-
-        _unitOfWork.Porudzbine.Remove(porudzbina);
-        _unitOfWork.SaveChanges();
 
         return Ok("Porudžbina uspešno obrisana.");
     }
