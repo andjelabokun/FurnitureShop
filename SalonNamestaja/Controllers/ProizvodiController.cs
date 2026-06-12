@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Domain;
-using SalonNamestaja.Domain.Repositories;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SalonNamestajaAPI.DTOs;
+using SalonNamestajaAPI.Features.Proizvodi.Commands;
+using SalonNamestajaAPI.Features.Proizvodi.Queries;
 
 namespace SalonNamestajaAPI.Controllers
 {
@@ -9,24 +11,24 @@ namespace SalonNamestajaAPI.Controllers
     [Route("api/[controller]")]
     public class ProizvodiController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public ProizvodiController(IUnitOfWork unitOfWork)
+        public ProizvodiController(IMediator mediator)
         {
-            _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var proizvodi = _unitOfWork.Proizvodi.GetAll();
+            var proizvodi = await _mediator.Send(new GetAllProizvodiQuery());
             return Ok(proizvodi);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var proizvod = _unitOfWork.Proizvodi.GetById(id);
+            var proizvod = await _mediator.Send(new GetProizvodByIdQuery(id));
 
             if (proizvod == null)
                 return NotFound("Proizvod nije pronađen.");
@@ -35,69 +37,40 @@ namespace SalonNamestajaAPI.Controllers
         }
 
         [HttpGet("boja/{bojaId}")]
-        public IActionResult GetPoBoji(int bojaId)
+        public async Task<IActionResult> GetPoBoji(int bojaId)
         {
-            var proizvodi = _unitOfWork.Proizvodi.GetSviBojom(bojaId);
+            var proizvodi = await _mediator.Send(new GetProizvodiPoBojiQuery(bojaId));
             return Ok(proizvodi);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Create(ProizvodCreateDto dto)
+        public async Task<IActionResult> Create(ProizvodCreateDto dto)
         {
-            var proizvod = new Proizvod
-            {
-                Naziv = dto.Naziv,
-                Opis = dto.Opis,
-                Cena = dto.Cena,
-                StanjeNaLageru = dto.StanjeNaLageru,
-                PodkategorijaID = dto.PodkategorijaId,
-                MaterijalID = dto.MaterijalId,
-                BojaID = dto.BojaId,
-                DimenzijeID = dto.DimenzijeId,
-                ProizvodjacID = dto.ProizvodjacId,
-                SlikaUrl = dto.SlikaUrl
-            };
-
-            _unitOfWork.Proizvodi.Add(proizvod);
-            _unitOfWork.SaveChanges();
-
+            var proizvod = await _mediator.Send(new CreateProizvodCommand(dto));
             return Ok(proizvod);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public IActionResult Update(int id, ProizvodUpdateDto dto)
+        public async Task<IActionResult> Update(int id, ProizvodUpdateDto dto)
         {
-            var proizvod = _unitOfWork.Proizvodi.GetById(id);
+            var proizvod = await _mediator.Send(new UpdateProizvodCommand(id, dto));
 
             if (proizvod == null)
                 return NotFound("Proizvod nije pronađen.");
-
-            proizvod.Naziv = dto.Naziv;
-            proizvod.Opis = dto.Opis;
-            proizvod.Cena = dto.Cena;
-            proizvod.StanjeNaLageru = dto.StanjeNaLageru;
-            proizvod.PodkategorijaID = dto.PodkategorijaId;
-            proizvod.MaterijalID = dto.MaterijalId;
-            proizvod.BojaID = dto.BojaId;
-            proizvod.DimenzijeID = dto.DimenzijeId;
-            proizvod.SlikaUrl = dto.SlikaUrl;
-
-            _unitOfWork.Proizvodi.Update(proizvod);
-            _unitOfWork.SaveChanges();
 
             return Ok(proizvod);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var proizvod = _unitOfWork.Proizvodi.GetById(id);
+            var obrisan = await _mediator.Send(new DeleteProizvodCommand(id));
 
-            if (proizvod == null)
+            if (!obrisan)
                 return NotFound("Proizvod nije pronađen.");
-
-            _unitOfWork.Proizvodi.Remove(proizvod);
-            _unitOfWork.SaveChanges();
 
             return Ok("Proizvod uspešno obrisan.");
         }
