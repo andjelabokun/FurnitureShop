@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Domain;
-using SalonNamestaja.Domain.Repositories;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SalonNamestajaAPI.DTOs;
+using SalonNamestajaAPI.Features.Kupci.Commands;
+using SalonNamestajaAPI.Features.Kupci.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
@@ -9,24 +11,24 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class KupciController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
 
-    public KupciController(IUnitOfWork unitOfWork)
+    public KupciController(IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var kupci = _unitOfWork.Kupci.GetAll();
+        var kupci = await _mediator.Send(new GetAllKupciQuery());
         return Ok(kupci);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var kupac = _unitOfWork.Kupci.GetById(id);
+        var kupac = await _mediator.Send(new GetKupacByIdQuery(id));
 
         if (kupac == null)
             return NotFound("Kupac nije pronađen.");
@@ -34,54 +36,34 @@ public class KupciController : ControllerBase
         return Ok(kupac);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
-    public IActionResult Create(KupacCreateDto dto)
+    public async Task<IActionResult> Create(KupacCreateDto dto)
     {
-        var kupac = new Kupac
-        {
-            Ime = dto.Ime,
-            Prezime = dto.Prezime,
-            Email = dto.Email,
-            Telefon = dto.Telefon,
-            TipKupca = dto.TipKupca,
-            PIB = dto.PIB
-        };
-
-        _unitOfWork.Kupci.Add(kupac);
-        _unitOfWork.SaveChanges();
-
+        var kupac = await _mediator.Send(new CreateKupacCommand(dto));
         return Ok(kupac);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    public IActionResult Update(int id, KupacUpdateDto dto)
+    public async Task<IActionResult> Update(int id, KupacUpdateDto dto)
     {
-        var kupac = _unitOfWork.Kupci.GetById(id);
+        var kupac = await _mediator.Send(new UpdateKupacCommand(id, dto));
 
         if (kupac == null)
             return NotFound("Kupac nije pronađen.");
-
-        kupac.Ime = dto.Ime;
-        kupac.Prezime = dto.Prezime;
-        kupac.Email = dto.Email;
-        kupac.Telefon = dto.Telefon;
-
-        _unitOfWork.Kupci.Update(kupac);
-        _unitOfWork.SaveChanges();
 
         return Ok(kupac);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var kupac = _unitOfWork.Kupci.GetById(id);
+        var obrisan = await _mediator.Send(new DeleteKupacCommand(id));
 
-        if (kupac == null)
+        if (!obrisan)
             return NotFound("Kupac nije pronađen.");
-
-        _unitOfWork.Kupci.Remove(kupac);
-        _unitOfWork.SaveChanges();
 
         return Ok("Kupac uspešno obrisan.");
     }
