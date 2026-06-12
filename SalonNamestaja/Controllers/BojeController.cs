@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Domain;
-using SalonNamestaja.Domain.Repositories;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SalonNamestajaAPI.DTOs;
+using SalonNamestajaAPI.Features.Boje.Commands;
+using SalonNamestajaAPI.Features.Boje.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
@@ -9,24 +11,24 @@ namespace SalonNamestajaAPI.Controllers;
 [Route("api/[controller]")]
 public class BojeController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMediator _mediator;
 
-    public BojeController(IUnitOfWork unitOfWork)
+    public BojeController(IMediator mediator)
     {
-        _unitOfWork = unitOfWork;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var boje = _unitOfWork.Boje.GetAll();
+        var boje = await _mediator.Send(new GetAllBojeQuery());
         return Ok(boje);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var boja = _unitOfWork.Boje.GetById(id);
+        var boja = await _mediator.Send(new GetBojaByIdQuery(id));
 
         if (boja == null)
             return NotFound("Boja nije pronađena.");
@@ -34,46 +36,34 @@ public class BojeController : ControllerBase
         return Ok(boja);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
-    public IActionResult Create(BojaDto dto)
+    public async Task<IActionResult> Create(BojaDto dto)
     {
-        var boja = new Boja
-        {
-            Naziv = dto.Naziv
-        };
-
-        _unitOfWork.Boje.Add(boja);
-        _unitOfWork.SaveChanges();
-
+        var boja = await _mediator.Send(new CreateBojaCommand(dto));
         return Ok(boja);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    public IActionResult Update(int id, BojaDto dto)
+    public async Task<IActionResult> Update(int id, BojaDto dto)
     {
-        var boja = _unitOfWork.Boje.GetById(id);
+        var boja = await _mediator.Send(new UpdateBojaCommand(id, dto));
 
         if (boja == null)
             return NotFound("Boja nije pronađena.");
-
-        boja.Naziv = dto.Naziv;
-
-        _unitOfWork.Boje.Update(boja);
-        _unitOfWork.SaveChanges();
 
         return Ok(boja);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var boja = _unitOfWork.Boje.GetById(id);
+        var obrisana = await _mediator.Send(new DeleteBojaCommand(id));
 
-        if (boja == null)
+        if (!obrisana)
             return NotFound("Boja nije pronađena.");
-
-        _unitOfWork.Boje.Remove(boja);
-        _unitOfWork.SaveChanges();
 
         return Ok("Boja uspešno obrisana.");
     }
