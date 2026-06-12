@@ -1,76 +1,71 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SalonNamestaja.Domain;
-using SalonNamestaja.Domain.Repositories;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SalonNamestajaAPI.DTOs;
+using SalonNamestajaAPI.Features.Dimenzije.Commands;
+using SalonNamestajaAPI.Features.Dimenzije.Queries;
 
 namespace SalonNamestajaAPI.Controllers
 {
-   
-        
-        [ApiController]
-        [Route("api/[controller]")]
-        public class DimenzijeController : ControllerBase
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DimenzijeController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public DimenzijeController(IMediator mediator)
         {
-            private readonly IUnitOfWork _uow;
+            _mediator = mediator;
+        }
 
-            public DimenzijeController(IUnitOfWork uow)
-            {
-                _uow = uow;
-            }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var dimenzije = await _mediator.Send(new GetAllDimenzijeQuery());
+            return Ok(dimenzije);
+        }
 
-            [HttpGet]
-            public IActionResult GetAll()
-            {
-                var dimenzije = _uow.Dimenzije.GetAll();
-                return Ok(dimenzije);
-            }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var dimenzija = await _mediator.Send(new GetDimenzijeByIdQuery(id));
 
-            [HttpGet("{id}")]
-            public IActionResult GetById(int id)
-            {
-                var dimenzija = _uow.Dimenzije.GetById(id);
-                if (dimenzija == null)
-                    return NotFound("Dimenzija nije pronađena.");
-                return Ok(dimenzija);
-            }
+            if (dimenzija == null)
+                return NotFound("Dimenzija nije pronađena.");
 
-            [HttpPost]
-            public IActionResult Create(DimenzijeDto dto)
-            {
-                var dimenzija = new Dimenzije
-                {
-                    Sirina = dto.Sirina,
-                    Visina = dto.Visina,
-                    Dubina = dto.Dubina
-                };
-                _uow.Dimenzije.Add(dimenzija);
-                _uow.SaveChanges();
-                return Ok(dimenzija);
-            }
+            return Ok(dimenzija);
+        }
 
-            [HttpPut("{id}")]
-            public IActionResult Update(int id, DimenzijeDto dto)
-            {
-                var dimenzija = _uow.Dimenzije.GetById(id);
-                if (dimenzija == null)
-                    return NotFound("Dimenzija nije pronađena.");
-                dimenzija.Sirina = dto.Sirina;
-                dimenzija.Visina = dto.Visina;
-                dimenzija.Dubina = dto.Dubina;
-                _uow.Dimenzije.Update(dimenzija);
-                _uow.SaveChanges();
-                return Ok(dimenzija);
-            }
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> Create(DimenzijeDto dto)
+        {
+            var dimenzija = await _mediator.Send(new CreateDimenzijeCommand(dto));
+            return Ok(dimenzija);
+        }
 
-            [HttpDelete("{id}")]
-            public IActionResult Delete(int id)
-            {
-                var dimenzija = _uow.Dimenzije.GetById(id);
-                if (dimenzija == null)
-                    return NotFound("Dimenzija nije pronađena.");
-                _uow.Dimenzije.Remove(dimenzija);
-                _uow.SaveChanges();
-                return Ok("Dimenzija uspešno obrisana.");
-            }
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, DimenzijeDto dto)
+        {
+            var dimenzija = await _mediator.Send(new UpdateDimenzijeCommand(id, dto));
+
+            if (dimenzija == null)
+                return NotFound("Dimenzija nije pronađena.");
+
+            return Ok(dimenzija);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var obrisana = await _mediator.Send(new DeleteDimenzijeCommand(id));
+
+            if (!obrisana)
+                return NotFound("Dimenzija nije pronađena.");
+
+            return Ok("Dimenzija uspešno obrisana.");
         }
     }
+}
