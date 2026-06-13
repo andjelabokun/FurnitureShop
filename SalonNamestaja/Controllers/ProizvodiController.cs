@@ -25,6 +25,13 @@ namespace SalonNamestajaAPI.Controllers
             return Ok(proizvodi);
         }
 
+        [HttpGet("sa-dimenzijama")]
+        public async Task<IActionResult> GetAllSaDimenzijama()
+        {
+            var proizvodi = await _mediator.Send(new GetAllProizvodiSaDimenzijamaQuery());
+            return Ok(proizvodi);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {

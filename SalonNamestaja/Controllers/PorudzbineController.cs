@@ -42,8 +42,8 @@ public class PorudzbineController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(PorudzbinaCreateDto dto)
     {
-        var porudzbina = await _mediator.Send(new CreatePorudzbinaCommand(dto));
-        return Ok(porudzbina);
+        var porudzbinaId = await _mediator.Send(new CreatePorudzbinaCommand(dto));
+        return Ok(new { porudzbinaId });
     }
 
     [Authorize(Roles = "Admin")]

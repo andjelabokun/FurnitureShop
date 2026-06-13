@@ -20,10 +20,8 @@ namespace SalonNamestajaAPI.Features.Porudzbine.Commands
             if (porudzbina == null)
                 return Task.FromResult<Porudzbina?>(null);
 
-            porudzbina.Status = request.Dto.Status;
+            
             porudzbina.UkupanIznos = request.Dto.UkupanIznos;
-            porudzbina.KupacID = request.Dto.KupacID;
-            porudzbina.ProdavacID = request.Dto.ProdavacID;
 
             _unitOfWork.Porudzbine.Update(porudzbina);
             _unitOfWork.SaveChanges();

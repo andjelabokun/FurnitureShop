@@ -2,6 +2,7 @@
 {
     public class PorudzbinaUpdateDto
     {
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; }
+        public double UkupanIznos { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Features.Porudzbine.Commands
 {
-    public class CreatePorudzbinaCommand : IRequest<Porudzbina>
+    public class CreatePorudzbinaCommand : IRequest<int>
     {
         public PorudzbinaCreateDto Dto { get; set; }
 

@@ -11,11 +11,7 @@ namespace SalonNamestaja.Domain
         public string Status { get; set; }
         public double UkupanIznos { get; set; }
 
-        public int KupacID { get; set; }
-        public Kupac Kupac { get; set; }
-
-        public int ProdavacID { get; set; }
-        public Prodavac Prodavac { get; set; }
+        public string ApplicationUserId { get; set; }   
 
         public ICollection<StavkaPorudzbine> StavkePorudzbine { get; set; }
         public Dostava Dostava { get; set; }
