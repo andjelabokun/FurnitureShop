@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using SalonNamestaja.Domain;
+using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Features.Proizvodi.Queries
 {
-    public class GetAllProizvodiQuery : IRequest<IEnumerable<Proizvod>>
+    public class GetAllProizvodiQuery : IRequest<IEnumerable<ProizvodDto>>
     {
     }
 }

@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using SalonNamestaja.Domain;
+using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Features.Proizvodi.Queries
 {
-    public class GetProizvodByIdQuery : IRequest<Proizvod?>
+    public class GetProizvodByIdQuery : IRequest<ProizvodDto?>
     {
         public int Id { get; set; }
 
