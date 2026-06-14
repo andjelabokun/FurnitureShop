@@ -4,8 +4,6 @@ import api from '../services/api';
 import { korpa } from './Cart';
 import { useAuth } from '../context/AuthContext';
 
-
-
 function Products() {
   const [proizvodi, setProizvodi] = useState([]);
   const [filtrirani, setFiltrirani] = useState([]);
@@ -13,6 +11,7 @@ function Products() {
   const [kategorije, setKategorije] = useState([]);
   const [podkategorije, setPodkategorije] = useState([]);
   const [filterOtvoren, setFilterOtvoren] = useState(false);
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
@@ -27,32 +26,91 @@ function Products() {
     maxDubina: '',
   });
 
+  const backendUrl = api.defaults.baseURL
+    ? api.defaults.baseURL.replace(/\/api\/?$/, '')
+    : 'https://localhost:7267';
+
+  const getSlikaUrl = (proizvod) => {
+    const url =
+      proizvod.slikaUrl ||
+      proizvod.SlikaUrl ||
+      proizvod.slikaURL ||
+      proizvod.SlikaURL;
+
+    if (!url) return '';
+
+    if (url.startsWith('http')) {
+      return url;
+    }
+
+    if (url.startsWith('/')) {
+      return `${backendUrl}${url}`;
+    }
+
+    return `${backendUrl}/${url}`;
+  };
+
   useEffect(() => {
-    api.get('/Proizvodi/sa-dimenzijama').then(r => { setProizvodi(r.data); setFiltrirani(r.data); });
-    api.get('/Boje').then(r => setBoje(r.data));
-    api.get('/Kategorije').then(r => setKategorije(r.data));
-    api.get('/PodKategorije').then(r => {console.log('Podkategorije:', r.data); setPodkategorije(r.data)});
+    api.get('/Proizvodi/sa-dimenzijama')
+      .then(r => {
+        console.log('Proizvodi:', r.data);
+        setProizvodi(r.data);
+        setFiltrirani(r.data);
+      })
+      .catch(err => {
+        console.log('Greška pri učitavanju proizvoda:', err.response?.data || err.message);
+      });
+
+    api.get('/Boje')
+      .then(r => setBoje(r.data))
+      .catch(err => console.log('Greška pri učitavanju boja:', err.response?.data || err.message));
+
+    api.get('/Kategorije')
+      .then(r => setKategorije(r.data))
+      .catch(err => console.log('Greška pri učitavanju kategorija:', err.response?.data || err.message));
+
+    api.get('/PodKategorije')
+      .then(r => {
+        console.log('Podkategorije:', r.data);
+        setPodkategorije(r.data);
+      })
+      .catch(err => console.log('Greška pri učitavanju podkategorija:', err.response?.data || err.message));
   }, []);
 
   useEffect(() => {
     let rezultat = [...proizvodi];
-    if (filteri.bojaID)
+
+    if (filteri.bojaID) {
       rezultat = rezultat.filter(p => p.bojaID === parseInt(filteri.bojaID));
-    if (filteri.kategorijaID)
+    }
+
+    if (filteri.kategorijaID) {
       rezultat = rezultat.filter(p => {
         const pk = podkategorije.find(pk => pk.podkategorijaID === p.podkategorijaID);
         return pk?.kategorijaID === parseInt(filteri.kategorijaID);
       });
-    if (filteri.podkategorijaID)
+    }
+
+    if (filteri.podkategorijaID) {
       rezultat = rezultat.filter(p => p.podkategorijaID === parseInt(filteri.podkategorijaID));
-    if (filteri.maxCena)
+    }
+
+    if (filteri.maxCena) {
       rezultat = rezultat.filter(p => p.cena <= parseFloat(filteri.maxCena));
-    if (filteri.maxSirina)
+    }
+
+    if (filteri.maxSirina) {
       rezultat = rezultat.filter(p => p.sirina <= parseFloat(filteri.maxSirina));
-    if (filteri.maxVisina)
+    }
+
+    if (filteri.maxVisina) {
       rezultat = rezultat.filter(p => p.visina <= parseFloat(filteri.maxVisina));
-    if (filteri.maxDubina)
+    }
+
+    if (filteri.maxDubina) {
       rezultat = rezultat.filter(p => p.dubina <= parseFloat(filteri.maxDubina));
+    }
+
     setFiltrirani(rezultat);
   }, [filteri, proizvodi, podkategorije]);
 
@@ -61,7 +119,15 @@ function Products() {
   };
 
   const resetFilteri = () => {
-    setFilteri({ bojaID: '', kategorijaID: '', podkategorijaID: '', maxCena: '', maxSirina: '', maxVisina: '', maxDubina: '' });
+    setFilteri({
+      bojaID: '',
+      kategorijaID: '',
+      podkategorijaID: '',
+      maxCena: '',
+      maxSirina: '',
+      maxVisina: '',
+      maxDubina: ''
+    });
   };
 
   const filtriranePodkategorije = filteri.kategorijaID
@@ -72,63 +138,90 @@ function Products() {
 
   return (
     <main style={styles.page}>
-      {/* HEADER */}
       <section style={styles.header}>
         <p style={styles.subtitle}>Salon nameštaja</p>
         <h1 style={styles.title}>Naši proizvodi</h1>
-        <p style={styles.text}>Izaberite moderan, kvalitetan i funkcionalan nameštaj za vaš dom.</p>
+        <p style={styles.text}>
+          Izaberite moderan, kvalitetan i funkcionalan nameštaj za vaš dom.
+        </p>
       </section>
 
-      {/* TOOLBAR */}
       <div style={styles.toolbar}>
         <span style={styles.brojRezultata}>{filtrirani.length} proizvoda</span>
+
         <button style={styles.filterBtn} onClick={() => setFilterOtvoren(true)}>
           Filteri {aktivnihFiltera > 0 && <span style={styles.badge}>{aktivnihFiltera}</span>}
         </button>
       </div>
 
-      {/* FILTER OVERLAY */}
       {filterOtvoren && (
         <>
           <div style={styles.backdrop} onClick={() => setFilterOtvoren(false)} />
+
           <div style={styles.filterDrawer}>
             <div style={styles.drawerHeader}>
               <h3 style={styles.drawerTitle}>Filteri</h3>
-              <button style={styles.closeBtn} onClick={() => setFilterOtvoren(false)}>✕</button>
+              <button style={styles.closeBtn} onClick={() => setFilterOtvoren(false)}>
+                ✕
+              </button>
             </div>
 
             <div style={styles.filterSection}>
               <p style={styles.filterLabel}>KATEGORIJA</p>
-              <select name="kategorijaID" value={filteri.kategorijaID} onChange={handleFilter} style={styles.select}>
+
+              <select
+                name="kategorijaID"
+                value={filteri.kategorijaID}
+                onChange={handleFilter}
+                style={styles.select}
+              >
                 <option value="">Sve kategorije</option>
                 {kategorije.map(k => (
-                  <option key={k.kategorijaID} value={k.kategorijaID}>{k.naziv}</option>
+                  <option key={k.kategorijaID} value={k.kategorijaID}>
+                    {k.naziv}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div style={styles.filterSection}>
               <p style={styles.filterLabel}>PODKATEGORIJA</p>
-              <select name="podkategorijaID" value={filteri.podkategorijaID} onChange={handleFilter} style={styles.select}>
+
+              <select
+                name="podkategorijaID"
+                value={filteri.podkategorijaID}
+                onChange={handleFilter}
+                style={styles.select}
+              >
                 <option value="">Sve podkategorije</option>
                 {filtriranePodkategorije.map(pk => (
-                  <option key={pk.podkategorijaID} value={pk.podkategorijaID}>{pk.naziv}</option>
+                  <option key={pk.podkategorijaID} value={pk.podkategorijaID}>
+                    {pk.naziv}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div style={styles.filterSection}>
               <p style={styles.filterLabel}>BOJA</p>
+
               <div style={styles.bojeGrid}>
                 {boje.map(b => (
                   <button
                     key={b.bojaID}
                     style={{
                       ...styles.bojaBtn,
-                      border: filteri.bojaID === String(b.bojaID) ? '2px solid #0b3d91' : '2px solid #e0e0e0',
+                      border: filteri.bojaID === String(b.bojaID)
+                        ? '2px solid #0b3d91'
+                        : '2px solid #e0e0e0',
                       fontWeight: filteri.bojaID === String(b.bojaID) ? '700' : '400',
                     }}
-                    onClick={() => setFilteri({ ...filteri, bojaID: filteri.bojaID === String(b.bojaID) ? '' : String(b.bojaID) })}
+                    onClick={() =>
+                      setFilteri({
+                        ...filteri,
+                        bojaID: filteri.bojaID === String(b.bojaID) ? '' : String(b.bojaID)
+                      })
+                    }
                   >
                     {b.naziv}
                   </button>
@@ -138,29 +231,64 @@ function Products() {
 
             <div style={styles.filterSection}>
               <p style={styles.filterLabel}>MAX CENA (RSD)</p>
-              <input name="maxCena" type="number" value={filteri.maxCena} onChange={handleFilter} placeholder="npr. 100000" style={styles.input} />
+
+              <input
+                name="maxCena"
+                type="number"
+                value={filteri.maxCena}
+                onChange={handleFilter}
+                placeholder="npr. 100000"
+                style={styles.input}
+              />
             </div>
 
             <div style={styles.filterSection}>
               <p style={styles.filterLabel}>DIMENZIJE (max cm)</p>
+
               <div style={styles.dimenzijeRow}>
                 <div>
                   <p style={styles.dimLabel}>Širina</p>
-                  <input name="maxSirina" type="number" value={filteri.maxSirina} onChange={handleFilter} placeholder="200" style={styles.inputSmall} />
+                  <input
+                    name="maxSirina"
+                    type="number"
+                    value={filteri.maxSirina}
+                    onChange={handleFilter}
+                    placeholder="200"
+                    style={styles.inputSmall}
+                  />
                 </div>
+
                 <div>
                   <p style={styles.dimLabel}>Visina</p>
-                  <input name="maxVisina" type="number" value={filteri.maxVisina} onChange={handleFilter} placeholder="100" style={styles.inputSmall} />
+                  <input
+                    name="maxVisina"
+                    type="number"
+                    value={filteri.maxVisina}
+                    onChange={handleFilter}
+                    placeholder="100"
+                    style={styles.inputSmall}
+                  />
                 </div>
+
                 <div>
                   <p style={styles.dimLabel}>Dubina</p>
-                  <input name="maxDubina" type="number" value={filteri.maxDubina} onChange={handleFilter} placeholder="80" style={styles.inputSmall} />
+                  <input
+                    name="maxDubina"
+                    type="number"
+                    value={filteri.maxDubina}
+                    onChange={handleFilter}
+                    placeholder="80"
+                    style={styles.inputSmall}
+                  />
                 </div>
               </div>
             </div>
 
             <div style={styles.drawerFooter}>
-              <button onClick={resetFilteri} style={styles.resetBtn}>Resetuj</button>
+              <button onClick={resetFilteri} style={styles.resetBtn}>
+                Resetuj
+              </button>
+
               <button onClick={() => setFilterOtvoren(false)} style={styles.prikaziBtn}>
                 Prikaži {filtrirani.length} rezultata
               </button>
@@ -169,44 +297,71 @@ function Products() {
         </>
       )}
 
-      {/* PROIZVODI */}
       <section style={styles.grid}>
         {filtrirani.length === 0 ? (
           <p style={styles.nema}>Nema proizvoda koji odgovaraju filterima.</p>
         ) : (
-          filtrirani.map((proizvod) => (
-            <div key={proizvod.proizvodID} style={styles.card}>
-              <div style={styles.imageBox}>
-                {proizvod.slikaUrl
-                  ? <img src={proizvod.slikaUrl} alt={proizvod.naziv} style={styles.image} />
-                  : <span style={styles.imageText}>{proizvod.naziv}</span>
-                }
+          filtrirani.map((proizvod) => {
+            const slika = getSlikaUrl(proizvod);
+
+            return (
+              <div key={proizvod.proizvodID} style={styles.card}>
+                <div style={styles.imageBox}>
+                  {slika ? (
+                    <img
+                      src={slika}
+                      alt={proizvod.naziv}
+                      style={styles.image}
+                      onError={(e) => {
+                        console.log('Slika se ne učitava:', slika);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span style={styles.imageText}>{proizvod.naziv}</span>
+                  )}
+                </div>
+
+                <div style={styles.cardBody}>
+                  <h3 style={styles.cardTitle}>{proizvod.naziv}</h3>
+
+                  <p style={styles.description}>{proizvod.opis}</p>
+
+                  <p style={styles.price}>
+                    {proizvod.cena?.toLocaleString()} RSD
+                  </p>
+
+                  <button
+                    style={styles.button}
+                    onClick={() => {
+                      if (!isLoggedIn()) {
+                        navigate('/login');
+                        return;
+                      }
+
+                      korpa.addItem(proizvod);
+                      navigate('/cart');
+                    }}
+                  >
+                    Dodaj u korpu
+                  </button>
+
+                  <button
+                    style={{
+                      ...styles.button,
+                      backgroundColor: 'transparent',
+                      border: '1px solid #102a43',
+                      color: '#102a43',
+                      marginTop: '8px'
+                    }}
+                    onClick={() => navigate(`/products/${proizvod.proizvodID}`)}
+                  >
+                    Pogledaj detalje
+                  </button>
+                </div>
               </div>
-              <div style={styles.cardBody}>
-                <h3 style={styles.cardTitle}>{proizvod.naziv}</h3>
-                <p style={styles.description}>{proizvod.opis}</p>
-                <p style={styles.price}>{proizvod.cena?.toLocaleString()} RSD</p>
-                <button
-                style={styles.button}
-                onClick={() => {
-                if (!isLoggedIn()) {
-                navigate('/login');
-                return;
-                }
-                korpa.addItem(proizvod);
-                navigate('/cart');
-                }}
->
-  Dodaj u korpu
-</button>
-                <button
-                style={{...styles.button, backgroundColor: 'transparent', border: '1px solid #102a43', color: '#102a43', marginTop: '8px'}}
-                onClick={() => navigate(`/products/${proizvod.proizvodID}`)}>
-                Pogledaj detalje
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </section>
     </main>
@@ -431,6 +586,7 @@ const styles = {
     width: "100%",
     height: "100%",
     objectFit: "cover",
+    display: "block",
   },
   imageText: {
     color: "#0b3d91",

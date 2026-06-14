@@ -3,29 +3,103 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const kategorijeDefault = [
-  { id: 1, naziv: "Dnevna soba", opis: "Garniture, trosedi, fotelje, klub stolovi i TV komode.", slika: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80" },
-  { id: 2, naziv: "Spavaća soba", opis: "Kreveti, ormari, komode i noćni ormarići.", slika: "https://images.unsplash.com/photo-1588046130717-0eb0c9a3ba15?w=600&q=80" },
-  { id: 3, naziv: "Trpezarija", opis: "Trpezarijski stolovi, stolice i setovi za ručavanje.", slika: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=80" },
-  { id: 4, naziv: "Kancelarija", opis: "Radni stolovi, kancelarijske stolice i police.", slika: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80" },
-  { id: 5, naziv: "Dečija soba", opis: "Dečiji kreveti, ormari i radni stolovi.", slika: "https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?w=600&q=80" },
+  {
+    naziv: "Dnevna soba",
+    opis: "Garniture, trosedi, fotelje, klub stolovi i TV komode.",
+    slika: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80"
+  },
+  {
+    naziv: "Spavaća soba",
+    opis: "Kreveti, ormari, komode i noćni ormarići.",
+    slika: "https://images.unsplash.com/photo-1588046130717-0eb0c9a3ba15?w=600&q=80"
+  },
+  {
+    naziv: "Trpezarija",
+    opis: "Trpezarijski stolovi, stolice i setovi za ručavanje.",
+    slika: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=80"
+  },
+  {
+    naziv: "Kancelarija",
+    opis: "Radni stolovi, kancelarijske stolice i police.",
+    slika: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80"
+  },
+  {
+    naziv: "Dečija soba",
+    opis: "Dečiji kreveti, ormari i radni stolovi.",
+    slika: "https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?w=600&q=80"
+  },
 ];
 
 function Categories() {
-  const [kategorije, setKategorije] = useState(kategorijeDefault);
+  const [kategorije, setKategorije] = useState([]);
   const navigate = useNavigate();
+
+  const backendUrl = api.defaults.baseURL
+    ? api.defaults.baseURL.replace(/\/api\/?$/, '')
+    : 'https://localhost:7267';
+
+  const getId = (kategorija) => {
+    return (
+      kategorija.kategorijaID ||
+      kategorija.kategorijaId ||
+      kategorija.KategorijaID ||
+      kategorija.KategorijaId ||
+      kategorija.id ||
+      kategorija.Id
+    );
+  };
+
+  const getNaziv = (kategorija) => {
+    return kategorija.naziv || kategorija.Naziv || '';
+  };
+
+  const getSlikaUrl = (kategorija) => {
+    const url =
+      kategorija.slikaUrl ||
+      kategorija.SlikaUrl ||
+      kategorija.slikaURL ||
+      kategorija.SlikaURL ||
+      kategorija.slika ||
+      kategorija.Slika;
+
+    if (!url) return '';
+
+    if (url.startsWith('http') || url.startsWith('blob:')) {
+      return url;
+    }
+
+    if (url.startsWith('/')) {
+      return `${backendUrl}${url}`;
+    }
+
+    return `${backendUrl}/${url}`;
+  };
 
   useEffect(() => {
     api.get('/Kategorije')
       .then(response => {
         if (response.data && response.data.length > 0) {
-          setKategorije(response.data.map((k, i) => ({
-            ...k,
-            slika: k.slikaUrl || kategorijeDefault[i % kategorijeDefault.length].slika,
-            opis: k.opis || kategorijeDefault[i % kategorijeDefault.length].opis
-          })));
+          const kategorijeIzBaze = response.data.map((k, i) => {
+            const defaultKategorija = kategorijeDefault[i % kategorijeDefault.length];
+
+            return {
+              ...k,
+              id: getId(k),
+              naziv: getNaziv(k),
+              opis: k.opis || k.Opis || defaultKategorija.opis,
+              slika: getSlikaUrl(k) || defaultKategorija.slika
+            };
+          });
+
+          setKategorije(kategorijeIzBaze);
+        } else {
+          setKategorije(kategorijeDefault);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.log('Greška pri učitavanju kategorija:', err.response?.data || err.message);
+        setKategorije(kategorijeDefault);
+      });
   }, []);
 
   const handlePogledaj = (kategorijaId, naziv) => {
@@ -44,23 +118,34 @@ function Categories() {
 
       <section style={styles.grid}>
         {kategorije.map((kategorija) => (
-          <div key={kategorija.id || kategorija.kategorijaID} style={styles.card}>
+          <div key={kategorija.id} style={styles.card}>
             <div style={styles.imageBox}>
-              <img
-                src={kategorija.slika || kategorija.slikaUrl}
-                alt={kategorija.naziv}
-                style={styles.image}
-                onError={e => e.target.style.display = 'none'}
-              />
+              {kategorija.slika ? (
+                <img
+                  src={kategorija.slika}
+                  alt={kategorija.naziv}
+                  style={styles.image}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div style={styles.noImage}>
+                  Nema slike
+                </div>
+              )}
+
               <div style={styles.overlay}>
                 <h3 style={styles.overlayTitle}>{kategorija.naziv}</h3>
               </div>
             </div>
+
             <div style={styles.cardBody}>
               <p style={styles.description}>{kategorija.opis}</p>
+
               <button
                 style={styles.button}
-                onClick={() => handlePogledaj(kategorija.id || kategorija.kategorijaID, kategorija.naziv)}
+                onClick={() => handlePogledaj(kategorija.id, kategorija.naziv)}
               >
                 Pogledaj ponudu →
               </button>
@@ -114,11 +199,21 @@ const styles = {
     position: "relative",
     height: "220px",
     overflow: "hidden",
+    backgroundColor: "#e0e8f0",
   },
   image: {
     width: "100%",
     height: "100%",
     objectFit: "cover",
+  },
+  noImage: {
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#627d98",
+    fontWeight: "600",
   },
   overlay: {
     position: "absolute",
