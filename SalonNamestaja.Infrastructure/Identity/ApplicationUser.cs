@@ -9,5 +9,9 @@ namespace SalonNamestaja.Infrastructure.Identity
     {
         public string Ime { get; set; }
         public string Prezime { get; set; }
+        public string? Telefon { get; set; }
+        public string? AdresaIsporuke { get; set; }
+        public int? PIB { get; set; }
+        public string? TipKupca { get; set; }
     }
 }

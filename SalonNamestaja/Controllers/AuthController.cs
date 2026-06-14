@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SalonNamestaja.Infrastructure.Identity;
 using SalonNamestajaAPI.DTOs.Auth;
@@ -57,6 +58,25 @@ namespace SalonNamestajaAPI.Controllers
 
             var token = _jwtTokenService.GenerateToken(user);
             return Ok(new { token });
+        }
+
+        [Authorize]
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDto dto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("Korisnik nije pronađen.");
+
+            user.Telefon = dto.Telefon;
+            user.AdresaIsporuke = dto.AdresaIsporuke;
+            user.PIB = dto.PIB;
+            user.TipKupca = dto.TipKupca;
+
+            await _userManager.UpdateAsync(user);
+            return Ok("Profil uspešno ažuriran.");
         }
     }
 }
