@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using SalonNamestaja.Domain;
+using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Features.Porudzbine.Queries
 {
-    public class GetAllPorudzbineQuery : IRequest<IEnumerable<Porudzbina>>
+    public class GetAllPorudzbineQuery : IRequest<IEnumerable<PorudzbinaDto>>
     {
     }
 }

@@ -47,6 +47,18 @@ public class PorudzbineController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> PromeniStatus(int id, PorudzbinaUpdateDto dto)
+    {
+        var porudzbina = await _mediator.Send(new PromeniStatusPorudzbineCommand(id, dto.Status));
+
+        if (porudzbina == null)
+            return NotFound("Porudžbina nije pronađena.");
+
+        return Ok(porudzbina);
+    }
+
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, PorudzbinaCreateDto dto)
     {

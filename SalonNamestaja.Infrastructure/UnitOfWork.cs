@@ -15,7 +15,7 @@ namespace SalonNamestaja.Infrastructure
         private IRepository<Boja>? _boje;
         private IRepository<Materijal>? _materijali;
         private IRepository<Proizvodjac>? _proizvodjaci;
-        private IRepository<Porudzbina>? _porudzbine;
+        private IPorudzbinaRepository? _porudzbine;
         private IRepository<Dimenzije>? _dimenzije;
         private IRepository<StavkaPorudzbine>? _stavkePorudzbine;
 
@@ -42,8 +42,8 @@ namespace SalonNamestaja.Infrastructure
         public IRepository<Proizvodjac> Proizvodjaci =>
             _proizvodjaci ??= new Repository<Proizvodjac>(_context);
 
-        public IRepository<Porudzbina> Porudzbine =>
-            _porudzbine ??= new Repository<Porudzbina>(_context);
+        public IPorudzbinaRepository Porudzbine =>
+     _porudzbine ??= new PorudzbinaRepository(_context);
 
         public IRepository<Dimenzije> Dimenzije =>
             _dimenzije ??= new Repository<Dimenzije>(_context);

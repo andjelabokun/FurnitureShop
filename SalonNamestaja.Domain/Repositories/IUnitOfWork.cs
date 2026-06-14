@@ -12,7 +12,7 @@ namespace SalonNamestaja.Domain.Repositories
         IRepository<Boja> Boje { get; }
         IRepository<Materijal> Materijali { get; }
         IRepository<Proizvodjac> Proizvodjaci { get; }
-        IRepository<Porudzbina> Porudzbine { get; }
+        IPorudzbinaRepository Porudzbine { get; }
         IRepository<Dimenzije> Dimenzije { get; }
         IRepository<StavkaPorudzbine> StavkePorudzbine { get; }
 
