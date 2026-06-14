@@ -82,6 +82,15 @@ function Cart() {
 
   const handlePorudzbina = async () => {
     try {
+      // prvo ažuriraj profil korisnika
+      await api.put('/Auth/update-profile', {
+        telefon: forma.telefon,
+        adresaIsporuke: forma.adresaIsporuke,
+        pib: forma.tipKupca === 'PravnoLice' ? parseInt(forma.pib) : null,
+        tipKupca: forma.tipKupca
+      });
+
+      
       await api.post('/Porudzbine', {
         ukupanIznos: ukupno,
         applicationUserId: user?.userId,
@@ -99,7 +108,7 @@ function Cart() {
     } catch {
       setGreska('Greška pri kreiranju porudžbine.');
     }
-  };
+};
 
   // Ekran uspešne kupovine
   if (uspesno) {
