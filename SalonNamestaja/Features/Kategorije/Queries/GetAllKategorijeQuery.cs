@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using SalonNamestaja.Domain;
+using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Features.Kategorije.Queries
 {
-    public class GetAllKategorijeQuery : IRequest<IEnumerable<Kategorija>>
+    public class GetAllKategorijeQuery : IRequest<IEnumerable<KategorijaDto>>
     {
     }
 }

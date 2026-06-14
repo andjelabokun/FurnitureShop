@@ -1,11 +1,11 @@
 ﻿using MediatR;
-using SalonNamestaja.Domain;
 using SalonNamestaja.Domain.Repositories;
+using SalonNamestajaAPI.DTOs;
 
 namespace SalonNamestajaAPI.Features.Kategorije.Queries
 {
     public class GetAllKategorijeQueryHandler
-        : IRequestHandler<GetAllKategorijeQuery, IEnumerable<Kategorija>>
+        : IRequestHandler<GetAllKategorijeQuery, IEnumerable<KategorijaDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -14,11 +14,19 @@ namespace SalonNamestajaAPI.Features.Kategorije.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public Task<IEnumerable<Kategorija>> Handle(
+        public Task<IEnumerable<KategorijaDto>> Handle(
             GetAllKategorijeQuery request,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(_unitOfWork.Kategorije.GetAll());
+            var kategorije = _unitOfWork.Kategorije.GetAll()
+                .Select(k => new KategorijaDto
+                {
+                    KategorijaID = k.KategorijaID,
+                    Naziv = k.Naziv,
+                    SlikaUrl = k.SlikaUrl
+                });
+
+            return Task.FromResult(kategorije);
         }
     }
 }

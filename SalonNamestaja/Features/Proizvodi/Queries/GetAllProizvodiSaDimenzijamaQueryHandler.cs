@@ -26,11 +26,17 @@ namespace SalonNamestajaAPI.Features.Proizvodi.Queries
                     Opis = p.Opis,
                     Cena = p.Cena,
                     StanjeNaLageru = p.StanjeNaLageru,
+
+                    PodkategorijaID = p.PodkategorijaID,
                     BojaID = p.BojaID,
-                    Sirina = p.Dimenzije?.Sirina,
-                    Visina = p.Dimenzije?.Visina,
-                    Dubina = p.Dimenzije?.Dubina
-                }).ToList();
+
+                    Sirina = p.Dimenzije != null ? p.Dimenzije.Sirina : null,
+                    Visina = p.Dimenzije != null ? p.Dimenzije.Visina : null,
+                    Dubina = p.Dimenzije != null ? p.Dimenzije.Dubina : null,
+
+                    SlikaUrl = p.SlikaUrl
+                })
+                .ToList();
 
             return Task.FromResult(proizvodi);
         }

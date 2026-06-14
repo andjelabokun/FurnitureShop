@@ -18,13 +18,13 @@ namespace SalonNamestajaAPI.Features.Kategorije.Commands
             UpdateKategorijaCommand request,
             CancellationToken cancellationToken)
         {
-            var kategorija =
-                _unitOfWork.Kategorije.GetById(request.Id);
+            var kategorija = _unitOfWork.Kategorije.GetById(request.Id);
 
             if (kategorija == null)
                 return Task.FromResult<Kategorija?>(null);
 
             kategorija.Naziv = request.Dto.Naziv;
+            kategorija.SlikaUrl = request.Dto.SlikaUrl;
 
             _unitOfWork.Kategorije.Update(kategorija);
             _unitOfWork.SaveChanges();

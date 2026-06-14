@@ -20,7 +20,8 @@ namespace SalonNamestajaAPI.Features.Kategorije.Commands
         {
             var kategorija = new Kategorija
             {
-                Naziv = request.Dto.Naziv
+                Naziv = request.Dto.Naziv,
+                SlikaUrl = request.Dto.SlikaUrl
             };
 
             _unitOfWork.Kategorije.Add(kategorija);
