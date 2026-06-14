@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -41,6 +41,7 @@ function AdminDashboard() {
   const [porudzbine, setPorudzbine] = useState([]);
   const [proizvodi, setProizvodi] = useState([]);
   const [poruka, setPoruka] = useState('');
+  const [otvorenePorudzbine, setOtvorenePorudzbine] = useState({});
 
   const [prikaziFormu, setPrikaziFormu] = useState(false);
   const [proizvodZaIzmenuId, setProizvodZaIzmenuId] = useState(null);
@@ -185,6 +186,152 @@ function AdminDashboard() {
       'ProizvodjacId',
       'Id'
     ]);
+  };
+
+  const getPorudzbinaId = (p) => {
+    return getId(p, [
+      'porudzbinaID',
+      'porudzbinaId',
+      'PorudzbinaID',
+      'PorudzbinaId',
+      'id',
+      'Id'
+    ]);
+  };
+
+  const getKupacObj = (p) => {
+    return p?.kupac || p?.Kupac || p?.korisnik || p?.Korisnik || p?.user || p?.User || null;
+  };
+
+  const getKupacIme = (p) => {
+    const kupac = getKupacObj(p);
+
+    return (
+      getVrednost(p, ['kupacIme', 'KupacIme', 'imeKupca', 'ImeKupca']) ||
+      getVrednost(kupac, ['ime', 'Ime']) ||
+      ''
+    );
+  };
+
+  const getKupacPrezime = (p) => {
+    const kupac = getKupacObj(p);
+
+    return (
+      getVrednost(p, ['kupacPrezime', 'KupacPrezime', 'prezimeKupca', 'PrezimeKupca']) ||
+      getVrednost(kupac, ['prezime', 'Prezime']) ||
+      ''
+    );
+  };
+
+  const getKupacEmail = (p) => {
+    const kupac = getKupacObj(p);
+
+    return (
+      getVrednost(p, ['kupacEmail', 'KupacEmail', 'emailKupca', 'EmailKupca']) ||
+      getVrednost(kupac, ['email', 'Email', 'userName', 'UserName']) ||
+      ''
+    );
+  };
+
+  const getKupacTelefon = (p) => {
+    const kupac = getKupacObj(p);
+
+    return (
+      getVrednost(p, ['kupacTelefon', 'KupacTelefon', 'telefonKupca', 'TelefonKupca']) ||
+      getVrednost(kupac, ['telefon', 'Telefon', 'phoneNumber', 'PhoneNumber']) ||
+      ''
+    );
+  };
+
+  const getKupacAdresa = (p) => {
+    const kupac = getKupacObj(p);
+
+    return (
+      getVrednost(p, [
+        'adresa',
+        'Adresa',
+        'adresaIsporuke',
+        'AdresaIsporuke',
+        'adresaKupca',
+        'AdresaKupca'
+      ]) ||
+      getVrednost(kupac, ['adresaIsporuke', 'AdresaIsporuke', 'adresa', 'Adresa']) ||
+      ''
+    );
+  };
+
+  const getStavke = (p) => {
+    const stavke = getVrednost(p, [
+      'stavke',
+      'Stavke',
+      'stavkePorudzbine',
+      'StavkePorudzbine'
+    ]);
+
+    return Array.isArray(stavke) ? stavke : [];
+  };
+
+  const getStavkaProizvodId = (stavka) => {
+    return getId(stavka, [
+      'proizvodID',
+      'proizvodId',
+      'ProizvodID',
+      'ProizvodId'
+    ]);
+  };
+
+  const getStavkaNaziv = (stavka) => {
+    const proizvod = getVrednost(stavka, ['proizvod', 'Proizvod'], null);
+    const proizvodId = getStavkaProizvodId(stavka);
+
+    const proizvodIzListe = proizvodi.find(p =>
+      String(getId(p, [
+        'proizvodID',
+        'proizvodId',
+        'ProizvodID',
+        'ProizvodId'
+      ])) === String(proizvodId)
+    );
+
+    return (
+      getVrednost(stavka, [
+        'proizvodNaziv',
+        'ProizvodNaziv',
+        'nazivProizvoda',
+        'NazivProizvoda',
+        'naziv',
+        'Naziv'
+      ]) ||
+      getNaziv(proizvod) ||
+      getNaziv(proizvodIzListe) ||
+      (proizvodId ? `Proizvod #${proizvodId}` : 'Proizvod')
+    );
+  };
+
+  const getStavkaKolicina = (stavka) => {
+    return getVrednost(stavka, ['kolicina', 'Kolicina'], 1);
+  };
+
+  const getStavkaCena = (stavka) => {
+    return getVrednost(stavka, [
+      'cena',
+      'Cena',
+      'cenaPoKomadu',
+      'CenaPoKomadu',
+      'jedinicnaCena',
+      'JedinicnaCena'
+    ], '');
+  };
+
+  const getStavkaIznos = (stavka) => {
+    return getVrednost(stavka, ['iznos', 'Iznos'], '');
+  };
+
+  const toggleStavke = (porudzbinaId) => {
+    setOtvorenePorudzbine(prev => ({
+      ...prev,
+      [porudzbinaId]: !prev[porudzbinaId]
+    }));
   };
 
   const formatirajSlikaUrl = (url) => {
@@ -334,7 +481,7 @@ function AdminDashboard() {
 
   const promeniStatus = async (id, noviStatus) => {
     try {
-      await api.put(`/Porudzbine/${id}`, {
+      await api.put(`/Porudzbine/${id}/status`, {
         status: noviStatus,
         ukupanIznos: 0
       });
@@ -343,7 +490,8 @@ function AdminDashboard() {
       ucitajPorudzbine();
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
-      console.log('Greška:', err.response?.data || err.message);
+      console.log('STATUS:', err.response?.status);
+      console.log('DATA:', err.response?.data);
       setPoruka('Greška pri promeni statusa.');
     }
   };
@@ -1118,12 +1266,16 @@ function AdminDashboard() {
       </div>
 
       {aktivnaTabela === 'porudzbine' && (
-        <div style={styles.tabela}>
-          <table style={styles.table}>
+        <div style={{ ...styles.tabela, ...styles.tabelaPorudzbine }}>
+          <table style={{ ...styles.table, ...styles.porudzbineTable }}>
             <thead>
               <tr style={styles.thead}>
                 <th style={styles.th}>ID</th>
                 <th style={styles.th}>Datum</th>
+                <th style={styles.th}>Kupac</th>
+                <th style={styles.th}>Email</th>
+                <th style={styles.th}>Telefon</th>
+                <th style={styles.th}>Adresa</th>
                 <th style={styles.th}>Iznos</th>
                 <th style={styles.th}>Status</th>
                 <th style={styles.th}>Akcija</th>
@@ -1131,40 +1283,143 @@ function AdminDashboard() {
             </thead>
 
             <tbody>
-              {porudzbine.map(p => (
-                <tr key={p.porudzbinaID} style={styles.tr}>
-                  <td style={styles.td}>#{p.porudzbinaID}</td>
-                  <td style={styles.td}>
-                    {new Date(p.datumVreme).toLocaleDateString('sr-RS')}
-                  </td>
-                  <td style={styles.td}>
-                    {p.ukupanIznos?.toLocaleString()} RSD
-                  </td>
-                  <td style={styles.td}>
-                    <span
-                      style={{
-                        ...styles.statusBadge,
-                        backgroundColor: statusBoja(p.status),
-                        color: statusTextBoja(p.status)
-                      }}
-                    >
-                      {p.status}
-                    </span>
-                  </td>
-                  <td style={styles.td}>
-                    <select
-                      style={styles.statusSelect}
-                      value={p.status}
-                      onChange={(e) => promeniStatus(p.porudzbinaID, e.target.value)}
-                    >
-                      <option value="Kreirana">Kreirana</option>
-                      <option value="U obradi">U obradi</option>
-                      <option value="Isporucena">Isporucena</option>
-                      <option value="Otkazana">Otkazana</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
+              {porudzbine.map(p => {
+                const porudzbinaId = getPorudzbinaId(p);
+                const datumVreme = getVrednost(p, ['datumVreme', 'DatumVreme', 'datum', 'Datum']);
+                const ukupanIznos = getVrednost(p, ['ukupanIznos', 'UkupanIznos'], 0);
+                const status = getVrednost(p, ['status', 'Status'], 'Kreirana');
+
+                const kupacIme = getKupacIme(p);
+                const kupacPrezime = getKupacPrezime(p);
+                const kupacEmail = getKupacEmail(p);
+                const kupacTelefon = getKupacTelefon(p);
+                const kupacAdresa = getKupacAdresa(p);
+                const stavke = getStavke(p);
+                const stavkeOtvorene = Boolean(otvorenePorudzbine[porudzbinaId]);
+
+                return (
+                  <Fragment key={porudzbinaId}>
+                    <tr style={styles.tr}>
+                      <td style={styles.td}>#{porudzbinaId}</td>
+
+                      <td style={styles.td}>
+                        {datumVreme ? new Date(datumVreme).toLocaleDateString('sr-RS') : '-'}
+                      </td>
+
+                      <td style={{ ...styles.td, ...styles.kupacCell }}>
+                        {kupacIme || kupacPrezime
+                          ? `${kupacIme} ${kupacPrezime}`.trim()
+                          : '-'}
+                      </td>
+
+                      <td style={{ ...styles.td, ...styles.emailCell }}>
+                        {kupacEmail || '-'}
+                      </td>
+
+                      <td style={{ ...styles.td, ...styles.telefonCell }}>
+                        {kupacTelefon || '-'}
+                      </td>
+
+                      <td style={{ ...styles.td, ...styles.adresaCell }}>
+                        {kupacAdresa || '-'}
+                      </td>
+
+                      <td style={styles.td}>
+                        {Number(ukupanIznos).toLocaleString()} RSD
+                      </td>
+
+                      <td style={styles.td}>
+                        <span
+                          style={{
+                            ...styles.statusBadge,
+                            backgroundColor: statusBoja(status),
+                            color: statusTextBoja(status)
+                          }}
+                        >
+                          {status}
+                        </span>
+                      </td>
+
+                      <td style={styles.td}>
+                        <div style={styles.akcijePorudzbine}>
+                          <button
+                            style={styles.editBtn}
+                            onClick={() => toggleStavke(porudzbinaId)}
+                          >
+                            {stavkeOtvorene ? 'Sakrij stavke' : 'Stavke'}
+                          </button>
+
+                          <select
+                            style={styles.statusSelect}
+                            value={status}
+                            onChange={(e) => promeniStatus(porudzbinaId, e.target.value)}
+                          >
+                            <option value="Kreirana">Kreirana</option>
+                            <option value="U obradi">U obradi</option>
+                            <option value="Isporucena">Isporucena</option>
+                            <option value="Otkazana">Otkazana</option>
+                          </select>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {stavkeOtvorene && (
+                      <tr style={styles.stavkeRed}>
+                        <td colSpan="9" style={styles.stavkeTd}>
+                          <div style={styles.stavkeBox}>
+                            <h4 style={styles.stavkeNaslov}>
+                              Stavke porudžbine #{porudzbinaId}
+                            </h4>
+
+                            {stavke.length > 0 ? (
+                              <table style={styles.stavkeTabela}>
+                                <thead>
+                                  <tr>
+                                    <th style={styles.stavkeTh}>Proizvod</th>
+                                    <th style={styles.stavkeTh}>Količina</th>
+                                    <th style={styles.stavkeTh}>Cena po komadu</th>
+                                    <th style={styles.stavkeTh}>Iznos</th>
+                                  </tr>
+                                </thead>
+
+                                <tbody>
+                                  {stavke.map((stavka, index) => {
+                                    const naziv = getStavkaNaziv(stavka);
+                                    const kolicina = getStavkaKolicina(stavka);
+                                    const cena = getStavkaCena(stavka);
+                                    const iznos = getStavkaIznos(stavka);
+
+                                    return (
+                                      <tr key={index}>
+                                        <td style={styles.stavkeTdMali}>{naziv}</td>
+                                        <td style={styles.stavkeTdMali}>{kolicina} kom</td>
+                                        <td style={styles.stavkeTdMali}>
+                                          {cena !== '' && cena !== null && cena !== undefined
+                                            ? `${Number(cena).toLocaleString()} RSD`
+                                            : '-'}
+                                        </td>
+                                        <td style={styles.stavkeTdMali}>
+                                          {iznos !== '' && iznos !== null && iznos !== undefined
+                                            ? `${Number(iznos).toLocaleString()} RSD`
+                                            : '-'}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            ) : (
+                              <p style={styles.praznoStavke}>
+                                Nema učitanih stavki za ovu porudžbinu.
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
 
@@ -1665,6 +1920,9 @@ const styles = {
     padding: "30px",
     boxShadow: "0 4px 15px rgba(0,0,0,0.06)",
   },
+  tabelaPorudzbine: {
+    overflowX: "auto",
+  },
   dodajBtn: {
     marginBottom: "20px",
     padding: "12px 24px",
@@ -1755,6 +2013,9 @@ const styles = {
     width: "100%",
     borderCollapse: "collapse",
   },
+  porudzbineTable: {
+    minWidth: "1200px",
+  },
   thead: {
     backgroundColor: "#f8fafc",
   },
@@ -1774,6 +2035,95 @@ const styles = {
     padding: "14px 16px",
     fontSize: "15px",
     color: "#102a43",
+    verticalAlign: "top",
+  },
+  kupacCell: {
+    minWidth: "150px",
+  },
+  emailCell: {
+    minWidth: "190px",
+  },
+  telefonCell: {
+    minWidth: "130px",
+  },
+  adresaCell: {
+    minWidth: "220px",
+    maxWidth: "280px",
+    lineHeight: "1.4",
+  },
+  stavkeCell: {
+    minWidth: "260px",
+    maxWidth: "340px",
+  },
+  stavkeLista: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  stavkaItem: {
+    padding: "8px 10px",
+    borderRadius: "8px",
+    backgroundColor: "#f7fbff",
+    border: "1px solid #e0e8f0",
+  },
+  stavkaNaziv: {
+    display: "block",
+    fontWeight: "700",
+    color: "#102a43",
+    marginBottom: "3px",
+  },
+  stavkaDetalji: {
+    display: "block",
+    fontSize: "13px",
+    color: "#627d98",
+  },
+  akcijePorudzbine: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    minWidth: "250px",
+  },
+  stavkeRed: {
+    backgroundColor: "#f8fafc",
+  },
+  stavkeTd: {
+    padding: "0",
+    borderBottom: "1px solid #e0e8f0",
+  },
+  stavkeBox: {
+    padding: "20px 30px",
+    backgroundColor: "#f8fafc",
+  },
+  stavkeNaslov: {
+    margin: "0 0 12px 0",
+    color: "#102a43",
+    fontSize: "16px",
+  },
+  stavkeTabela: {
+    width: "100%",
+    borderCollapse: "collapse",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    overflow: "hidden",
+  },
+  stavkeTh: {
+    padding: "10px 12px",
+    backgroundColor: "#eaf4ff",
+    color: "#102a43",
+    textAlign: "left",
+    fontSize: "13px",
+    fontWeight: "700",
+  },
+  stavkeTdMali: {
+    padding: "10px 12px",
+    borderBottom: "1px solid #e0e8f0",
+    color: "#102a43",
+    fontSize: "14px",
+  },
+  praznoStavke: {
+    margin: 0,
+    color: "#627d98",
+    fontSize: "14px",
   },
   statusBadge: {
     padding: "4px 12px",
