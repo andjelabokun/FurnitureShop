@@ -30,16 +30,131 @@ function Products() {
     ? api.defaults.baseURL.replace(/\/api\/?$/, '')
     : 'https://localhost:7267';
 
+  const getVrednost = (obj, keys, fallback = '') => {
+    for (const key of keys) {
+      if (obj && obj[key] !== undefined && obj[key] !== null) {
+        return obj[key];
+      }
+    }
+
+    return fallback;
+  };
+
+  const getId = (obj, keys) => {
+    for (const key of keys) {
+      if (obj && obj[key] !== undefined && obj[key] !== null) {
+        return obj[key];
+      }
+    }
+
+    return '';
+  };
+
+  const getNaziv = (obj) => {
+    return getVrednost(obj, ['naziv', 'Naziv', 'ime', 'Ime'], '');
+  };
+
+  const getProizvodId = (p) => {
+    return getId(p, [
+      'proizvodID',
+      'proizvodId',
+      'ProizvodID',
+      'ProizvodId',
+      'id',
+      'Id'
+    ]);
+  };
+
+  const getBojaId = (b) => {
+    return getId(b, [
+      'bojaID',
+      'bojaId',
+      'BojaID',
+      'BojaId',
+      'id',
+      'Id'
+    ]);
+  };
+
+  const getKategorijaId = (k) => {
+    return getId(k, [
+      'kategorijaID',
+      'kategorijaId',
+      'KategorijaID',
+      'KategorijaId',
+      'id',
+      'Id'
+    ]);
+  };
+
+  const getPodkategorijaId = (pk) => {
+    return getId(pk, [
+      'podkategorijaID',
+      'podkategorijaId',
+      'podKategorijaID',
+      'podKategorijaId',
+      'PodkategorijaID',
+      'PodkategorijaId',
+      'PodKategorijaID',
+      'PodKategorijaId',
+      'id',
+      'Id'
+    ]);
+  };
+
+  const getKategorijaIdIzPodkategorije = (pk) => {
+    return getId(pk, [
+      'kategorijaID',
+      'kategorijaId',
+      'KategorijaID',
+      'KategorijaId'
+    ]);
+  };
+
+  const getProizvodBojaId = (p) => {
+    return getId(p, [
+      'bojaID',
+      'bojaId',
+      'BojaID',
+      'BojaId'
+    ]);
+  };
+
+  const getProizvodPodkategorijaId = (p) => {
+    return getId(p, [
+      'podkategorijaID',
+      'podkategorijaId',
+      'podKategorijaID',
+      'podKategorijaId',
+      'PodkategorijaID',
+      'PodkategorijaId',
+      'PodKategorijaID',
+      'PodKategorijaId'
+    ]);
+  };
+
+  const getBroj = (obj, keys, fallback = null) => {
+    const vrednost = getVrednost(obj, keys, fallback);
+
+    if (vrednost === null || vrednost === undefined || vrednost === '') {
+      return fallback;
+    }
+
+    const broj = Number(vrednost);
+    return Number.isNaN(broj) ? fallback : broj;
+  };
+
   const getSlikaUrl = (proizvod) => {
-    const url =
-      proizvod.slikaUrl ||
-      proizvod.SlikaUrl ||
-      proizvod.slikaURL ||
-      proizvod.SlikaURL;
+    const url = getVrednost(proizvod, [
+      'slikaUrl',
+      'SlikaUrl',
+      'slikaURL',
+      'SlikaURL'
+    ]);
 
     if (!url) return '';
 
-    if (url.startsWith('http')) {
+    if (url.startsWith('http') || url.startsWith('blob:')) {
       return url;
     }
 
@@ -54,25 +169,25 @@ function Products() {
     api.get('/Proizvodi/sa-dimenzijama')
       .then(r => {
         console.log('Proizvodi:', r.data);
-        setProizvodi(r.data);
-        setFiltrirani(r.data);
+        setProizvodi(Array.isArray(r.data) ? r.data : []);
+        setFiltrirani(Array.isArray(r.data) ? r.data : []);
       })
       .catch(err => {
         console.log('Greška pri učitavanju proizvoda:', err.response?.data || err.message);
       });
 
     api.get('/Boje')
-      .then(r => setBoje(r.data))
+      .then(r => setBoje(Array.isArray(r.data) ? r.data : []))
       .catch(err => console.log('Greška pri učitavanju boja:', err.response?.data || err.message));
 
     api.get('/Kategorije')
-      .then(r => setKategorije(r.data))
+      .then(r => setKategorije(Array.isArray(r.data) ? r.data : []))
       .catch(err => console.log('Greška pri učitavanju kategorija:', err.response?.data || err.message));
 
     api.get('/PodKategorije')
       .then(r => {
         console.log('Podkategorije:', r.data);
-        setPodkategorije(r.data);
+        setPodkategorije(Array.isArray(r.data) ? r.data : []);
       })
       .catch(err => console.log('Greška pri učitavanju podkategorija:', err.response?.data || err.message));
   }, []);
@@ -81,41 +196,65 @@ function Products() {
     let rezultat = [...proizvodi];
 
     if (filteri.bojaID) {
-      rezultat = rezultat.filter(p => p.bojaID === parseInt(filteri.bojaID));
+      rezultat = rezultat.filter(p =>
+        String(getProizvodBojaId(p)) === String(filteri.bojaID)
+      );
     }
 
     if (filteri.kategorijaID) {
       rezultat = rezultat.filter(p => {
-        const pk = podkategorije.find(pk => pk.podkategorijaID === p.podkategorijaID);
-        return pk?.kategorijaID === parseInt(filteri.kategorijaID);
+        const proizvodPodkategorijaId = getProizvodPodkategorijaId(p);
+
+        const podkategorija = podkategorije.find(pk =>
+          String(getPodkategorijaId(pk)) === String(proizvodPodkategorijaId)
+        );
+
+        return String(getKategorijaIdIzPodkategorije(podkategorija)) === String(filteri.kategorijaID);
       });
     }
 
     if (filteri.podkategorijaID) {
-      rezultat = rezultat.filter(p => p.podkategorijaID === parseInt(filteri.podkategorijaID));
+      rezultat = rezultat.filter(p =>
+        String(getProizvodPodkategorijaId(p)) === String(filteri.podkategorijaID)
+      );
     }
 
     if (filteri.maxCena) {
-      rezultat = rezultat.filter(p => p.cena <= parseFloat(filteri.maxCena));
+      rezultat = rezultat.filter(p => {
+        const cena = getBroj(p, ['cena', 'Cena'], 0);
+        return cena <= Number(filteri.maxCena);
+      });
     }
 
     if (filteri.maxSirina) {
-      rezultat = rezultat.filter(p => p.sirina <= parseFloat(filteri.maxSirina));
+      rezultat = rezultat.filter(p => {
+        const sirina = getBroj(p, ['sirina', 'Sirina'], null);
+        return sirina !== null && sirina <= Number(filteri.maxSirina);
+      });
     }
 
     if (filteri.maxVisina) {
-      rezultat = rezultat.filter(p => p.visina <= parseFloat(filteri.maxVisina));
+      rezultat = rezultat.filter(p => {
+        const visina = getBroj(p, ['visina', 'Visina'], null);
+        return visina !== null && visina <= Number(filteri.maxVisina);
+      });
     }
 
     if (filteri.maxDubina) {
-      rezultat = rezultat.filter(p => p.dubina <= parseFloat(filteri.maxDubina));
+      rezultat = rezultat.filter(p => {
+        const dubina = getBroj(p, ['dubina', 'Dubina'], null);
+        return dubina !== null && dubina <= Number(filteri.maxDubina);
+      });
     }
 
     setFiltrirani(rezultat);
   }, [filteri, proizvodi, podkategorije]);
 
   const handleFilter = (e) => {
-    setFilteri({ ...filteri, [e.target.name]: e.target.value });
+    setFilteri({
+      ...filteri,
+      [e.target.name]: e.target.value
+    });
   };
 
   const resetFilteri = () => {
@@ -131,7 +270,9 @@ function Products() {
   };
 
   const filtriranePodkategorije = filteri.kategorijaID
-    ? podkategorije.filter(pk => pk.kategorijaID === parseInt(filteri.kategorijaID))
+    ? podkategorije.filter(pk =>
+        String(getKategorijaIdIzPodkategorije(pk)) === String(filteri.kategorijaID)
+      )
     : podkategorije;
 
   const aktivnihFiltera = Object.values(filteri).filter(v => v !== '').length;
@@ -172,15 +313,25 @@ function Products() {
               <select
                 name="kategorijaID"
                 value={filteri.kategorijaID}
-                onChange={handleFilter}
+                onChange={(e) => {
+                  setFilteri({
+                    ...filteri,
+                    kategorijaID: e.target.value,
+                    podkategorijaID: ''
+                  });
+                }}
                 style={styles.select}
               >
                 <option value="">Sve kategorije</option>
-                {kategorije.map(k => (
-                  <option key={k.kategorijaID} value={k.kategorijaID}>
-                    {k.naziv}
-                  </option>
-                ))}
+                {kategorije.map(k => {
+                  const id = getKategorijaId(k);
+
+                  return (
+                    <option key={id} value={id}>
+                      {getNaziv(k)}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -194,11 +345,15 @@ function Products() {
                 style={styles.select}
               >
                 <option value="">Sve podkategorije</option>
-                {filtriranePodkategorije.map(pk => (
-                  <option key={pk.podkategorijaID} value={pk.podkategorijaID}>
-                    {pk.naziv}
-                  </option>
-                ))}
+                {filtriranePodkategorije.map(pk => {
+                  const id = getPodkategorijaId(pk);
+
+                  return (
+                    <option key={id} value={id}>
+                      {getNaziv(pk)}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -206,26 +361,30 @@ function Products() {
               <p style={styles.filterLabel}>BOJA</p>
 
               <div style={styles.bojeGrid}>
-                {boje.map(b => (
-                  <button
-                    key={b.bojaID}
-                    style={{
-                      ...styles.bojaBtn,
-                      border: filteri.bojaID === String(b.bojaID)
-                        ? '2px solid #0b3d91'
-                        : '2px solid #e0e0e0',
-                      fontWeight: filteri.bojaID === String(b.bojaID) ? '700' : '400',
-                    }}
-                    onClick={() =>
-                      setFilteri({
-                        ...filteri,
-                        bojaID: filteri.bojaID === String(b.bojaID) ? '' : String(b.bojaID)
-                      })
-                    }
-                  >
-                    {b.naziv}
-                  </button>
-                ))}
+                {boje.map(b => {
+                  const id = getBojaId(b);
+
+                  return (
+                    <button
+                      key={id}
+                      style={{
+                        ...styles.bojaBtn,
+                        border: String(filteri.bojaID) === String(id)
+                          ? '2px solid #0b3d91'
+                          : '2px solid #e0e0e0',
+                        fontWeight: String(filteri.bojaID) === String(id) ? '700' : '400',
+                      }}
+                      onClick={() =>
+                        setFilteri({
+                          ...filteri,
+                          bojaID: String(filteri.bojaID) === String(id) ? '' : String(id)
+                        })
+                      }
+                    >
+                      {getNaziv(b)}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -302,15 +461,19 @@ function Products() {
           <p style={styles.nema}>Nema proizvoda koji odgovaraju filterima.</p>
         ) : (
           filtrirani.map((proizvod) => {
+            const id = getProizvodId(proizvod);
+            const naziv = getVrednost(proizvod, ['naziv', 'Naziv']);
+            const opis = getVrednost(proizvod, ['opis', 'Opis']);
+            const cena = getBroj(proizvod, ['cena', 'Cena'], 0);
             const slika = getSlikaUrl(proizvod);
 
             return (
-              <div key={proizvod.proizvodID} style={styles.card}>
+              <div key={id} style={styles.card}>
                 <div style={styles.imageBox}>
                   {slika ? (
                     <img
                       src={slika}
-                      alt={proizvod.naziv}
+                      alt={naziv}
                       style={styles.image}
                       onError={(e) => {
                         console.log('Slika se ne učitava:', slika);
@@ -318,17 +481,17 @@ function Products() {
                       }}
                     />
                   ) : (
-                    <span style={styles.imageText}>{proizvod.naziv}</span>
+                    <span style={styles.imageText}>{naziv}</span>
                   )}
                 </div>
 
                 <div style={styles.cardBody}>
-                  <h3 style={styles.cardTitle}>{proizvod.naziv}</h3>
+                  <h3 style={styles.cardTitle}>{naziv}</h3>
 
-                  <p style={styles.description}>{proizvod.opis}</p>
+                  <p style={styles.description}>{opis}</p>
 
                   <p style={styles.price}>
-                    {proizvod.cena?.toLocaleString()} RSD
+                    {cena.toLocaleString()} RSD
                   </p>
 
                   <button
@@ -339,7 +502,14 @@ function Products() {
                         return;
                       }
 
-                      korpa.addItem(proizvod);
+                      korpa.addItem({
+                        proizvodID: Number(id),
+                        naziv,
+                        opis,
+                        cena,
+                        slikaUrl: slika
+                      });
+
                       navigate('/cart');
                     }}
                   >
@@ -354,7 +524,7 @@ function Products() {
                       color: '#102a43',
                       marginTop: '8px'
                     }}
-                    onClick={() => navigate(`/products/${proizvod.proizvodID}`)}
+                    onClick={() => navigate(`/products/${id}`)}
                   >
                     Pogledaj detalje
                   </button>

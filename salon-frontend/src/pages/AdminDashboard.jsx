@@ -15,7 +15,25 @@ function AdminDashboard() {
     bojaId: '',
     dimenzijeId: '',
     proizvodjacId: '',
-    slikaUrl: ''
+    slikaUrl: '',
+
+    tipProizvoda: 'Proizvod',
+
+    punjenje: '',
+    orijentacija: '',
+    brojMesta: '',
+    rasklopiva: false,
+
+    dimenzijaDuseka: '',
+    imaSanduk: false,
+    tipKreveta: '',
+
+    brojVrata: '',
+    imaOgledalo: false,
+    tipVrata: '',
+
+    oblik: '',
+    rasklopiv: false
   });
 
   const pocetneHelperForme = () => ({
@@ -909,6 +927,15 @@ function AdminDashboard() {
     });
   };
 
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+
+    setNoviProizvod({
+      ...noviProizvod,
+      [name]: checked
+    });
+  };
+
   const handleKategorijaChange = (e) => {
     setNoviProizvod({
       ...noviProizvod,
@@ -1016,7 +1043,25 @@ function AdminDashboard() {
           'ProizvodjacId',
           'ProizvodjacID'
         ])),
-        slikaUrl: slikaUrl || ''
+        slikaUrl: slikaUrl || '',
+
+        tipProizvoda: getVrednost(proizvod, ['tipProizvoda', 'TipProizvoda'], 'Proizvod') || 'Proizvod',
+
+        punjenje: getVrednost(proizvod, ['punjenje', 'Punjenje']),
+        orijentacija: getVrednost(proizvod, ['orijentacija', 'Orijentacija']),
+        brojMesta: String(getVrednost(proizvod, ['brojMesta', 'BrojMesta'], '')),
+        rasklopiva: Boolean(getVrednost(proizvod, ['rasklopiva', 'Rasklopiva'], false)),
+
+        dimenzijaDuseka: getVrednost(proizvod, ['dimenzijaDuseka', 'DimenzijaDuseka']),
+        imaSanduk: Boolean(getVrednost(proizvod, ['imaSanduk', 'ImaSanduk'], false)),
+        tipKreveta: getVrednost(proizvod, ['tipKreveta', 'TipKreveta']),
+
+        brojVrata: String(getVrednost(proizvod, ['brojVrata', 'BrojVrata'], '')),
+        imaOgledalo: Boolean(getVrednost(proizvod, ['imaOgledalo', 'ImaOgledalo'], false)),
+        tipVrata: getVrednost(proizvod, ['tipVrata', 'TipVrata']),
+
+        oblik: getVrednost(proizvod, ['oblik', 'Oblik']),
+        rasklopiv: Boolean(getVrednost(proizvod, ['rasklopiv', 'Rasklopiv'], false))
       });
 
       setIzabranaSlika(null);
@@ -1071,7 +1116,25 @@ function AdminDashboard() {
         bojaId: Number(noviProizvod.bojaId),
         dimenzijeId: Number(noviProizvod.dimenzijeId),
         proizvodjacId: Number(noviProizvod.proizvodjacId),
-        slikaUrl: slikaUrl
+        slikaUrl: slikaUrl,
+
+        tipProizvoda: noviProizvod.tipProizvoda,
+
+        punjenje: noviProizvod.punjenje,
+        orijentacija: noviProizvod.orijentacija,
+        brojMesta: noviProizvod.brojMesta ? Number(noviProizvod.brojMesta) : null,
+        rasklopiva: noviProizvod.rasklopiva,
+
+        dimenzijaDuseka: noviProizvod.dimenzijaDuseka,
+        imaSanduk: noviProizvod.imaSanduk,
+        tipKreveta: noviProizvod.tipKreveta,
+
+        brojVrata: noviProizvod.brojVrata ? Number(noviProizvod.brojVrata) : null,
+        imaOgledalo: noviProizvod.imaOgledalo,
+        tipVrata: noviProizvod.tipVrata,
+
+        oblik: noviProizvod.oblik,
+        rasklopiv: noviProizvod.rasklopiv
       };
 
       if (proizvodZaIzmenuId) {
@@ -1562,6 +1625,158 @@ function AdminDashboard() {
                 ))}
               </select>
 
+              <select
+                style={styles.input}
+                name="tipProizvoda"
+                value={noviProizvod.tipProizvoda}
+                onChange={handleChange}
+              >
+                <option value="Proizvod">Običan proizvod</option>
+                <option value="Garnitura">Garnitura</option>
+                <option value="Krevet">Krevet</option>
+                <option value="Orman">Orman</option>
+                <option value="Sto">Sto</option>
+              </select>
+
+              {noviProizvod.tipProizvoda === 'Garnitura' && (
+                <div style={styles.specijalizacijaBox}>
+                  <h4 style={styles.specijalizacijaNaslov}>Podaci za garnituru</h4>
+
+                  <input
+                    style={styles.input}
+                    name="punjenje"
+                    placeholder="Punjenje, npr. pena, žičano jezgro"
+                    value={noviProizvod.punjenje}
+                    onChange={handleChange}
+                  />
+
+                  <input
+                    style={styles.input}
+                    name="orijentacija"
+                    placeholder="Orijentacija, npr. leva/desna"
+                    value={noviProizvod.orijentacija}
+                    onChange={handleChange}
+                  />
+
+                  <input
+                    style={styles.input}
+                    type="number"
+                    name="brojMesta"
+                    placeholder="Broj mesta"
+                    value={noviProizvod.brojMesta}
+                    onChange={handleChange}
+                  />
+
+                  <label style={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      name="rasklopiva"
+                      checked={noviProizvod.rasklopiva}
+                      onChange={handleCheckboxChange}
+                    />
+                    Rasklopiva
+                  </label>
+                </div>
+              )}
+
+              {noviProizvod.tipProizvoda === 'Krevet' && (
+                <div style={styles.specijalizacijaBox}>
+                  <h4 style={styles.specijalizacijaNaslov}>Podaci za krevet</h4>
+
+                  <input
+                    style={styles.input}
+                    name="dimenzijaDuseka"
+                    placeholder="Dimenzija dušeka, npr. 160x200"
+                    value={noviProizvod.dimenzijaDuseka}
+                    onChange={handleChange}
+                  />
+
+                  <input
+                    style={styles.input}
+                    name="tipKreveta"
+                    placeholder="Tip kreveta, npr. bračni, dečiji"
+                    value={noviProizvod.tipKreveta}
+                    onChange={handleChange}
+                  />
+
+                  <label style={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      name="imaSanduk"
+                      checked={noviProizvod.imaSanduk}
+                      onChange={handleCheckboxChange}
+                    />
+                    Ima sanduk
+                  </label>
+                </div>
+              )}
+
+              {noviProizvod.tipProizvoda === 'Orman' && (
+                <div style={styles.specijalizacijaBox}>
+                  <h4 style={styles.specijalizacijaNaslov}>Podaci za orman</h4>
+
+                  <input
+                    style={styles.input}
+                    type="number"
+                    name="brojVrata"
+                    placeholder="Broj vrata"
+                    value={noviProizvod.brojVrata}
+                    onChange={handleChange}
+                  />
+
+                  <input
+                    style={styles.input}
+                    name="tipVrata"
+                    placeholder="Tip vrata, npr. klizna/standardna"
+                    value={noviProizvod.tipVrata}
+                    onChange={handleChange}
+                  />
+
+                  <label style={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      name="imaOgledalo"
+                      checked={noviProizvod.imaOgledalo}
+                      onChange={handleCheckboxChange}
+                    />
+                    Ima ogledalo
+                  </label>
+                </div>
+              )}
+
+              {noviProizvod.tipProizvoda === 'Sto' && (
+                <div style={styles.specijalizacijaBox}>
+                  <h4 style={styles.specijalizacijaNaslov}>Podaci za sto</h4>
+
+                  <input
+                    style={styles.input}
+                    name="oblik"
+                    placeholder="Oblik, npr. okrugli, pravougaoni"
+                    value={noviProizvod.oblik}
+                    onChange={handleChange}
+                  />
+
+                  <input
+                    style={styles.input}
+                    type="number"
+                    name="brojMesta"
+                    placeholder="Broj mesta"
+                    value={noviProizvod.brojMesta}
+                    onChange={handleChange}
+                  />
+
+                  <label style={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      name="rasklopiv"
+                      checked={noviProizvod.rasklopiv}
+                      onChange={handleCheckboxChange}
+                    />
+                    Rasklopiv
+                  </label>
+                </div>
+              )}
+
               <div style={styles.slikaBox}>
                 <label style={styles.label}>
                   {proizvodZaIzmenuId
@@ -1605,6 +1820,7 @@ function AdminDashboard() {
               <tr style={styles.thead}>
                 <th style={styles.th}>ID</th>
                 <th style={styles.th}>Naziv</th>
+                <th style={styles.th}>Tip</th>
                 <th style={styles.th}>Cena</th>
                 <th style={styles.th}>Stanje</th>
                 <th style={styles.th}>Akcije</th>
@@ -1616,6 +1832,7 @@ function AdminDashboard() {
                 <tr key={p.proizvodID} style={styles.tr}>
                   <td style={styles.td}>#{p.proizvodID}</td>
                   <td style={styles.td}>{p.naziv}</td>
+                  <td style={styles.td}>{getVrednost(p, ['tipProizvoda', 'TipProizvoda'], 'Proizvod')}</td>
                   <td style={styles.td}>{p.cena?.toLocaleString()} RSD</td>
                   <td style={styles.td}>{p.stanjeNaLageru} kom</td>
                   <td style={styles.td}>
@@ -1972,6 +2189,28 @@ const styles = {
     fontSize: "14px",
     fontWeight: "600",
     color: "#102a43",
+  },
+  specijalizacijaBox: {
+    padding: "18px",
+    backgroundColor: "white",
+    border: "1px solid #cfe8ff",
+    borderRadius: "10px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+  specijalizacijaNaslov: {
+    margin: 0,
+    color: "#102a43",
+    fontSize: "16px",
+  },
+  checkboxLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "15px",
+    color: "#102a43",
+    fontWeight: "600",
   },
   previewSlika: {
     width: "180px",
