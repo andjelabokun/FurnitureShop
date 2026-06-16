@@ -58,6 +58,13 @@ function Login() {
           Prijavi se
         </button>
 
+        <button 
+  style={styles.googleBtn}
+  onClick={() => window.location.href = 'https://localhost:7267/api/Auth/google-login'}
+>
+  Prijavi se sa Google-om
+</button>
+
         <p style={styles.link}>
           Nemate nalog?{' '}
           <a href="/register" style={styles.a}>Registrujte se</a>
@@ -124,6 +131,20 @@ const styles = {
     color: '#0b3d91',
     fontWeight: '600',
   },
+  googleBtn: {
+  padding: "14px",
+  borderRadius: "10px",
+  border: "1.5px solid #e0e0e0",
+  backgroundColor: "white",
+  color: "#102a43",
+  fontSize: "16px",
+  cursor: "pointer",
+  fontWeight: "600",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "10px",
+},
 };
 
 export default Login;

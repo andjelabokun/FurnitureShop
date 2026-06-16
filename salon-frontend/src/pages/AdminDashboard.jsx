@@ -462,7 +462,7 @@ function AdminDashboard() {
     ]);
     const bojeData = await ucitajSaMogucimRutama(['/Boje']);
     const materijaliData = await ucitajSaMogucimRutama([
-      '/Materijali',
+      '/Materijal',
       '/Materijal'
     ]);
     const dimenzijeData = await ucitajSaMogucimRutama(['/Dimenzije']);
@@ -692,7 +692,7 @@ function AdminDashboard() {
       materijali: {
         naslov: 'Materijali',
         jednina: 'materijal',
-        rute: ['/Materijali', '/Materijal'],
+        rute: ['/Materijal', '/Materijal'],
         lista: materijali,
         getId: getMaterijalId,
         praznaForma: pocetneHelperForme().materijali,

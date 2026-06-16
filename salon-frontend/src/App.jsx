@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Cart from './pages/Cart';
 import AdminDashboard from './pages/AdminDashboard';
+import GoogleAuth from './pages/GoogleAuth';
+
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/google-auth" element={<GoogleAuth />} />
 
       </Routes>
     </>
