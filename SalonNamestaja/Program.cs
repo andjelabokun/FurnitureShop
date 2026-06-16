@@ -10,6 +10,7 @@ using SalonNamestaja.Infrastructure;
 using SalonNamestaja.Infrastructure.Data;
 using SalonNamestaja.Infrastructure.Identity;
 using Scalar.AspNetCore;
+using SalonNamestajaAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddOpenApi();
+builder.Services.AddHostedService<AutoPromenaStatusaPorudzbineService>();
 
 builder.Services.AddCors(options =>
 {
