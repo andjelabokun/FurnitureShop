@@ -112,6 +112,12 @@ function AdminDashboard() {
     ucitajPorudzbine();
     ucitajProizvode();
     ucitajPomocnePodatke();
+
+    const interval = setInterval(() => {
+      ucitajPorudzbine();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const getId = (obj, keys) => {
@@ -511,6 +517,27 @@ function AdminDashboard() {
       console.log('STATUS:', err.response?.status);
       console.log('DATA:', err.response?.data);
       setPoruka('Greška pri promeni statusa.');
+    }
+  };
+
+  const obrisiPorudzbinu = async (id) => {
+    if (!window.confirm('Da li ste sigurni da želite da obrišete ovu porudžbinu?')) return;
+
+    try {
+      await api.delete(`/Porudzbine/${id}`);
+
+      setOtvorenePorudzbine(prev => {
+        const kopija = { ...prev };
+        delete kopija[id];
+        return kopija;
+      });
+
+      setPoruka('Porudžbina uspešno obrisana!');
+      ucitajPorudzbine();
+      setTimeout(() => setPoruka(''), 3000);
+    } catch (err) {
+      console.log('Greška pri brisanju porudžbine:', err.response?.data || err.message);
+      setPoruka('Greška pri brisanju porudžbine. Proverite da li backend ima DELETE rutu.');
     }
   };
 
@@ -1422,6 +1449,13 @@ function AdminDashboard() {
                             <option value="Isporucena">Isporucena</option>
                             <option value="Otkazana">Otkazana</option>
                           </select>
+
+                          <button
+                            style={styles.deleteBtn}
+                            onClick={() => obrisiPorudzbinu(porudzbinaId)}
+                          >
+                            Obriši
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -2320,7 +2354,8 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "10px",
-    minWidth: "250px",
+    minWidth: "340px",
+    flexWrap: "wrap",
   },
   stavkeRed: {
     backgroundColor: "#f8fafc",

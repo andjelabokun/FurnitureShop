@@ -1,8 +1,13 @@
+import { useNavigate } from "react-router-dom";
+
 import sofa from "../assets/garnitura.jpg";
 import krevet from "../assets/Krevet.jpg";
 import sto from "../assets/Sto.webp";
 import ugaona from "../assets/Ugaona.jpg";
+
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <main style={styles.page}>
       <section style={styles.hero}>
@@ -19,76 +24,86 @@ function Home() {
           </p>
 
           <div style={styles.buttons}>
-            <button style={styles.primaryButton}>Pogledaj proizvode</button>
-            <button style={styles.secondaryButton}>O nama</button>
+            <button
+              style={styles.primaryButton}
+              onClick={() => navigate("/products")}
+            >
+              Pogledaj proizvode
+            </button>
+
+            <button
+              style={styles.secondaryButton}
+              onClick={() => navigate("/about")}
+            >
+              O nama
+            </button>
           </div>
         </div>
 
         <div style={styles.card}>
           <img
-              src={sofa}
-              alt="Garnitura"
-             style={styles.image}
-                                />
+            src={sofa}
+            alt="Garnitura"
+            style={styles.image}
+          />
+
           <h3 style={styles.cardTitle}>Ugaona garnitura</h3>
-          <p style={styles.cardText}>Udobnost i stil za moderan dnevni boravak.</p>
+          <p style={styles.cardText}>
+            Udobnost i stil za moderan dnevni boravak.
+          </p>
           <span style={styles.price}>od 85.000 RSD</span>
         </div>
       </section>
-<section style={styles.productsSection}>
-  <h2 style={styles.productsTitle}>Popularni proizvodi</h2>
 
-  <div style={styles.productsGrid}>
+      <section style={styles.productsSection}>
+        <h2 style={styles.productsTitle}>Popularni proizvodi</h2>
 
-    <div style={styles.productCard}>
-      <img
-  src={ugaona}
-  alt="Ugaona garnitura"
-  style={styles.productImage}
-/>
+        <div style={styles.productsGrid}>
+          <div style={styles.productCard}>
+            <img
+              src={ugaona}
+              alt="Ugaona garnitura"
+              style={styles.productImage}
+            />
 
-      <h3 style={styles.productName}>Ugaona garnitura</h3>
+            <h3 style={styles.productName}>Ugaona garnitura</h3>
+            <p style={styles.productPrice}>85.000 RSD</p>
+          </div>
 
-      <p style={styles.productPrice}>85.000 RSD</p>
-    </div>
+          <div style={styles.productCard}>
+            <img
+              src={krevet}
+              alt="Krevet"
+              style={styles.productImage}
+            />
 
-    <div style={styles.productCard}>
-     <img
-  src={krevet}
-  alt="Krevet"
-  style={styles.productImage}
-/>
+            <h3 style={styles.productName}>Krevet</h3>
+            <p style={styles.productPrice}>62.000 RSD</p>
+          </div>
 
-      <h3 style={styles.productName}>Krevet</h3>
+          <div style={styles.productCard}>
+            <img
+              src={sto}
+              alt="Sto"
+              style={styles.productImage}
+            />
 
-      <p style={styles.productPrice}>62.000 RSD</p>
-    </div>
-
-    <div style={styles.productCard}>
-      <img
-  src={sto}
-  alt="Sto"
-  style={styles.productImage}
-/>
-
-      <h3 style={styles.productName}>Trpezarijski sto</h3>
-
-      <p style={styles.productPrice}>39.000 RSD</p>
-    </div>
-
-  </div>
-</section>
+            <h3 style={styles.productName}>Trpezarijski sto</h3>
+            <p style={styles.productPrice}>39.000 RSD</p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
 
 const styles = {
- page: {
-  width: "100vw",
-  marginLeft: "calc(50% - 50vw)",
-  minHeight: "calc(100vh - 90px)",
-  background: "linear-gradient(135deg, #f4faff 0%, #ffffff 50%, #eaf5ff 100%)",
-},
+  page: {
+    width: "100vw",
+    marginLeft: "calc(50% - 50vw)",
+    minHeight: "calc(100vh - 90px)",
+    background: "linear-gradient(135deg, #f4faff 0%, #ffffff 50%, #eaf5ff 100%)",
+  },
 
   hero: {
     minHeight: "calc(100vh - 90px)",
@@ -162,17 +177,6 @@ const styles = {
     boxShadow: "0 25px 60px rgba(11, 61, 145, 0.18)",
   },
 
-  imageBox: {
-    height: "240px",
-    borderRadius: "24px",
-    background: "linear-gradient(135deg, #d8ecff, #f7fbff)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "95px",
-    marginBottom: "24px",
-  },
-
   cardTitle: {
     fontSize: "25px",
     color: "#082f73",
@@ -190,58 +194,60 @@ const styles = {
     color: "#0b3d91",
     fontWeight: "800",
   },
+
   image: {
-  width: "100%",
-height: "320px",
-  objectFit: "cover",
-  borderRadius: "24px",
-  marginBottom: "24px",
-},
-productsSection: {
-  padding: "80px 140px",
-  backgroundColor: "white",
-},
+    width: "100%",
+    height: "320px",
+    objectFit: "cover",
+    borderRadius: "24px",
+    marginBottom: "24px",
+  },
 
-productsTitle: {
-  fontSize: "42px",
-  color: "#082f73",
-  marginBottom: "50px",
-  textAlign: "center",
-},
+  productsSection: {
+    padding: "80px 140px",
+    backgroundColor: "white",
+  },
 
-productsGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
-  gap: "35px",
-},
+  productsTitle: {
+    fontSize: "42px",
+    color: "#082f73",
+    marginBottom: "50px",
+    textAlign: "center",
+  },
 
-productCard: {
-  backgroundColor: "#f8fbff",
-  borderRadius: "24px",
-  padding: "20px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-  transition: "0.3s",
-},
+  productsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "35px",
+  },
 
-productImage: {
-  width: "100%",
-  height: "260px",
-  objectFit: "cover",
-  borderRadius: "18px",
-  marginBottom: "20px",
-},
+  productCard: {
+    backgroundColor: "#f8fbff",
+    borderRadius: "24px",
+    padding: "20px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+    transition: "0.3s",
+  },
 
-productName: {
-  fontSize: "24px",
-  color: "#082f73",
-  marginBottom: "10px",
-},
+  productImage: {
+    width: "100%",
+    height: "260px",
+    objectFit: "cover",
+    borderRadius: "18px",
+    marginBottom: "20px",
+  },
 
-productPrice: {
-  fontSize: "20px",
-  fontWeight: "700",
-  color: "#0b3d91",
-}
+  productName: {
+    fontSize: "24px",
+    color: "#082f73",
+    marginBottom: "10px",
+  },
+
+  productPrice: {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#0b3d91",
+  },
 };
 
 export default Home;

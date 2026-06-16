@@ -6,30 +6,61 @@ function About() {
         <h1 style={styles.title}>FurnitureShop</h1>
         <p style={styles.text}>
           FurnitureShop je salon nameštaja namenjen svima koji žele moderan,
-          kvalitetan i funkcionalan nameštaj za svoj dom.
+          kvalitetan i funkcionalan nameštaj za svoj dom. Naša ponuda obuhvata
+          nameštaj za dnevne sobe, spavaće sobe, kuhinje, trpezarije, kancelarije
+          i druge prostorije.
         </p>
       </section>
 
       <section style={styles.content}>
         <div style={styles.infoBox}>
           <h2 style={styles.sectionTitle}>Kontakt informacije</h2>
-          <p>📍 Bulevar kralja Aleksandra 73, Beograd</p>
-          <p>📞 +381 11 123 4567</p>
-          <p>✉️ info@furnitureshop.rs</p>
-          <p>🕒 Ponedeljak - Subota: 09:00 - 20:00</p>
+
+          <div style={styles.infoItem}>
+            <span style={styles.icon}>📍</span>
+            <span>Bulevar kralja Aleksandra 73, Beograd</span>
+          </div>
+
+          <div style={styles.infoItem}>
+            <span style={styles.icon}>📞</span>
+            <span>+381 11 123 4567</span>
+          </div>
+
+          <div style={styles.infoItem}>
+            <span style={styles.icon}>✉️</span>
+            <span>info@furnitureshop.rs</span>
+          </div>
+
+          <div style={styles.infoItem}>
+            <span style={styles.icon}>🕒</span>
+            <span>Ponedeljak - Subota: 09:00 - 20:00</span>
+          </div>
         </div>
 
-        <form style={styles.form}>
-          <h2 style={styles.sectionTitle}>Pošaljite poruku</h2>
+        <div style={styles.infoBox}>
+          <h2 style={styles.sectionTitle}>Zašto izabrati nas?</h2>
 
-          <input style={styles.input} type="text" placeholder="Ime" />
-          <input style={styles.input} type="email" placeholder="Email" />
-          <textarea style={styles.textarea} placeholder="Poruka" />
+          <p style={styles.paragraph}>
+            Naš cilj je da kupcima omogućimo jednostavnu kupovinu nameštaja,
+            preglednu ponudu proizvoda i pouzdanu uslugu.
+          </p>
 
-          <button style={styles.button} type="button">
-            Pošalji
-          </button>
-        </form>
+          <div style={styles.benefit}>✔ Kvalitetan i funkcionalan nameštaj</div>
+          <div style={styles.benefit}>✔ Moderna ponuda za različite prostorije</div>
+          <div style={styles.benefit}>✔ Jednostavno naručivanje putem sajta</div>
+          <div style={styles.benefit}>✔ Pregled proizvoda po kategorijama</div>
+        </div>
+
+        <div style={styles.fullBox}>
+          <h2 style={styles.sectionTitle}>Naša ponuda</h2>
+
+          <p style={styles.paragraph}>
+            U okviru našeg salona možete pronaći različite vrste nameštaja:
+            garniture, krevete, ormane, stolove, stolice, komode, police i druge
+            proizvode za opremanje doma. Proizvodi su organizovani po kategorijama
+            i podkategorijama kako bi kupovina bila jednostavnija i preglednija.
+          </p>
+        </div>
       </section>
     </main>
   );
@@ -50,16 +81,17 @@ const styles = {
     fontWeight: "600",
     letterSpacing: "2px",
     textTransform: "uppercase",
+    marginBottom: "10px",
   },
   title: {
-    fontSize: "46px",
+    fontSize: "48px",
     color: "#102a43",
     margin: "10px 0",
   },
   text: {
     fontSize: "18px",
     color: "#52616b",
-    maxWidth: "750px",
+    maxWidth: "850px",
     margin: "0 auto",
     lineHeight: "1.7",
   },
@@ -67,6 +99,8 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
     gap: "30px",
+    maxWidth: "1200px",
+    margin: "0 auto",
   },
   infoBox: {
     backgroundColor: "#ffffff",
@@ -76,41 +110,46 @@ const styles = {
     color: "#52616b",
     fontSize: "18px",
   },
-  form: {
+  fullBox: {
+    gridColumn: "1 / -1",
     backgroundColor: "#ffffff",
     borderRadius: "18px",
     padding: "35px",
     boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
+    color: "#52616b",
+    fontSize: "18px",
   },
   sectionTitle: {
     color: "#102a43",
-    marginBottom: "15px",
+    marginBottom: "22px",
+    textAlign: "center",
+    fontSize: "26px",
   },
-  input: {
-    padding: "14px",
-    borderRadius: "10px",
+  infoItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    marginBottom: "16px",
+    lineHeight: "1.5",
+  },
+  icon: {
+    fontSize: "22px",
+    width: "30px",
+    textAlign: "center",
+  },
+  paragraph: {
+    lineHeight: "1.7",
+    marginBottom: "20px",
+    textAlign: "center",
+  },
+  benefit: {
+    backgroundColor: "#f7fbff",
     border: "1px solid #d9e2ec",
-    fontSize: "16px",
-  },
-  textarea: {
-    padding: "14px",
-    borderRadius: "10px",
-    border: "1px solid #d9e2ec",
-    fontSize: "16px",
-    minHeight: "120px",
-    resize: "vertical",
-  },
-  button: {
-    padding: "14px",
-    border: "none",
-    borderRadius: "10px",
-    backgroundColor: "#0b3d91",
-    color: "white",
-    fontSize: "16px",
-    cursor: "pointer",
+    borderRadius: "12px",
+    padding: "12px 15px",
+    marginBottom: "12px",
+    color: "#102a43",
+    fontWeight: "500",
   },
 };
 
