@@ -19,6 +19,13 @@ namespace SalonNamestajaAPI.Features.Proizvodi.Commands
             if (proizvod == null)
                 return Task.FromResult(false);
 
+            var postojiUPorudzbini = _unitOfWork.StavkePorudzbine
+                .GetAll()
+                .Any(s => s.ProizvodID == request.Id);
+
+            if (postojiUPorudzbini)
+                throw new InvalidOperationException("Proizvod ne može biti obrisan jer se nalazi u nekoj porudžbini.");
+
             _unitOfWork.Proizvodi.Remove(proizvod);
             _unitOfWork.SaveChanges();
 

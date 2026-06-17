@@ -74,12 +74,19 @@ namespace SalonNamestajaAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var obrisan = await _mediator.Send(new DeleteProizvodCommand(id));
+            try
+            {
+                var obrisan = await _mediator.Send(new DeleteProizvodCommand(id));
 
-            if (!obrisan)
-                return NotFound("Proizvod nije pronađen.");
+                if (!obrisan)
+                    return NotFound("Proizvod nije pronađen.");
 
-            return Ok("Proizvod uspešno obrisan.");
+                return Ok("Proizvod uspešno obrisan.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

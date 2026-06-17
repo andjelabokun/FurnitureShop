@@ -60,11 +60,18 @@ public class BojeController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var obrisana = await _mediator.Send(new DeleteBojaCommand(id));
+        try
+        {
+            var obrisana = await _mediator.Send(new DeleteBojaCommand(id));
 
-        if (!obrisana)
-            return NotFound("Boja nije pronađena.");
+            if (!obrisana)
+                return NotFound("Boja nije pronađena.");
 
-        return Ok("Boja uspešno obrisana.");
+            return Ok("Boja uspešno obrisana.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

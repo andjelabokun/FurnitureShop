@@ -29,11 +29,14 @@ namespace SalonNamestajaAPI.Services
                 {
                     var prosloSekundi = (sada - porudzbina.DatumVreme).TotalSeconds;
 
-                    if (porudzbina.Status == "Kreirana" && prosloSekundi >= 10)
+                    // Posle 1 minuta status ide iz Kreirana u U obradi
+                    if (porudzbina.Status == "Kreirana" && prosloSekundi >= 60)
                     {
                         porudzbina.Status = "U obradi";
                     }
-                    else if (porudzbina.Status == "U obradi" && prosloSekundi >= 20)
+
+                    // Posle 2 minuta status ide iz U obradi u Isporucena
+                    else if (porudzbina.Status == "U obradi" && prosloSekundi >= 120)
                     {
                         porudzbina.Status = "Isporucena";
                     }

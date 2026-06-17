@@ -19,6 +19,13 @@ namespace SalonNamestajaAPI.Features.Boje.Commands
             if (boja == null)
                 return Task.FromResult(false);
 
+            var postojiProizvod = _unitOfWork.Proizvodi
+                .GetAll()
+                .Any(p => p.BojaID == request.Id);
+
+            if (postojiProizvod)
+                throw new InvalidOperationException("Boja ne može biti obrisana jer postoji proizvod koji je koristi.");
+
             _unitOfWork.Boje.Remove(boja);
             _unitOfWork.SaveChanges();
 

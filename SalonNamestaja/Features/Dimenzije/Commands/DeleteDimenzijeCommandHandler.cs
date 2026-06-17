@@ -22,6 +22,13 @@ namespace SalonNamestajaAPI.Features.Dimenzije.Commands
             if (dimenzije == null)
                 return Task.FromResult(false);
 
+            var postojiProizvod = _unitOfWork.Proizvodi
+                .GetAll()
+                .Any(p => p.DimenzijeID == request.Id);
+
+            if (postojiProizvod)
+                throw new InvalidOperationException("Dimenzije ne mogu biti obrisane jer postoji proizvod koji ih koristi.");
+
             _unitOfWork.Dimenzije.Remove(dimenzije);
             _unitOfWork.SaveChanges();
 

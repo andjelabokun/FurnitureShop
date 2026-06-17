@@ -19,6 +19,13 @@ namespace SalonNamestajaAPI.Features.PodKategorije.Commands
             if (podkategorija == null)
                 return Task.FromResult(false);
 
+            var postojiProizvod = _unitOfWork.Proizvodi
+                .GetAll()
+                .Any(p => p.PodkategorijaID == request.Id);
+
+            if (postojiProizvod)
+                throw new InvalidOperationException("Podkategorija ne može biti obrisana jer postoji proizvod koji joj pripada.");
+
             _unitOfWork.PodKategorije.Remove(podkategorija);
             _unitOfWork.SaveChanges();
 
