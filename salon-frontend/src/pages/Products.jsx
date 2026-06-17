@@ -12,6 +12,9 @@ function Products() {
   const [podkategorije, setPodkategorije] = useState([]);
   const [filterOtvoren, setFilterOtvoren] = useState(false);
 
+  const BROJ_PO_STRANI = 6;
+  const [trenutnaStrana, setTrenutnaStrana] = useState(1);
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
@@ -248,6 +251,7 @@ function Products() {
     }
 
     setFiltrirani(rezultat);
+    setTrenutnaStrana(1);
   }, [filteri, proizvodi, podkategorije]);
 
   const handleFilter = (e) => {
@@ -267,6 +271,8 @@ function Products() {
       maxVisina: '',
       maxDubina: ''
     });
+
+    setTrenutnaStrana(1);
   };
 
   const filtriranePodkategorije = filteri.kategorijaID
@@ -276,6 +282,18 @@ function Products() {
     : podkategorije;
 
   const aktivnihFiltera = Object.values(filteri).filter(v => v !== '').length;
+
+  const ukupnoStrana = Math.max(1, Math.ceil(filtrirani.length / BROJ_PO_STRANI));
+  const pocetak = (trenutnaStrana - 1) * BROJ_PO_STRANI;
+  const kraj = pocetak + BROJ_PO_STRANI;
+  const proizvodiZaPrikaz = filtrirani.slice(pocetak, kraj);
+
+  const idiNaStranu = (brojStrane) => {
+    if (brojStrane < 1 || brojStrane > ukupnoStrana) return;
+
+    setTrenutnaStrana(brojStrane);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <main style={styles.page}>
@@ -460,7 +478,7 @@ function Products() {
         {filtrirani.length === 0 ? (
           <p style={styles.nema}>Nema proizvoda koji odgovaraju filterima.</p>
         ) : (
-          filtrirani.map((proizvod) => {
+          proizvodiZaPrikaz.map((proizvod) => {
             const id = getProizvodId(proizvod);
             const naziv = getVrednost(proizvod, ['naziv', 'Naziv']);
             const opis = getVrednost(proizvod, ['opis', 'Opis']);
@@ -534,6 +552,49 @@ function Products() {
           })
         )}
       </section>
+
+      {filtrirani.length > BROJ_PO_STRANI && (
+        <div style={styles.paginacija}>
+          <button
+            style={{
+              ...styles.pageBtn,
+              ...(trenutnaStrana === 1 ? styles.pageBtnDisabled : {})
+            }}
+            disabled={trenutnaStrana === 1}
+            onClick={() => idiNaStranu(trenutnaStrana - 1)}
+          >
+            Prethodna
+          </button>
+
+          {Array.from({ length: ukupnoStrana }, (_, index) => {
+            const brojStrane = index + 1;
+
+            return (
+              <button
+                key={brojStrane}
+                style={{
+                  ...styles.pageBtn,
+                  ...(trenutnaStrana === brojStrane ? styles.pageBtnActive : {})
+                }}
+                onClick={() => idiNaStranu(brojStrane)}
+              >
+                {brojStrane}
+              </button>
+            );
+          })}
+
+          <button
+            style={{
+              ...styles.pageBtn,
+              ...(trenutnaStrana === ukupnoStrana ? styles.pageBtnDisabled : {})
+            }}
+            disabled={trenutnaStrana === ukupnoStrana}
+            onClick={() => idiNaStranu(trenutnaStrana + 1)}
+          >
+            Sledeća
+          </button>
+        </div>
+      )}
     </main>
   );
 }
@@ -737,6 +798,33 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
     gap: "30px",
+  },
+  paginacija: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "35px",
+    flexWrap: "wrap",
+  },
+  pageBtn: {
+    padding: "10px 14px",
+    border: "1px solid #cfe8ff",
+    borderRadius: "6px",
+    backgroundColor: "white",
+    color: "#102a43",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  pageBtnActive: {
+    backgroundColor: "#102a43",
+    color: "white",
+    border: "1px solid #102a43",
+  },
+  pageBtnDisabled: {
+    opacity: 0.45,
+    cursor: "not-allowed",
   },
   card: {
     backgroundColor: "#ffffff",

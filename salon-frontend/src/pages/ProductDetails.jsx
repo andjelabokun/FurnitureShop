@@ -18,6 +18,7 @@ function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [greska, setGreska] = useState('');
   const [poruka, setPoruka] = useState('');
+  const [tipPoruke, setTipPoruke] = useState('success');
 
   const backendUrl = api.defaults.baseURL
     ? api.defaults.baseURL.replace(/\/api\/?$/, '')
@@ -26,6 +27,10 @@ function ProductDetails() {
   useEffect(() => {
     ucitajSve();
   }, [id]);
+
+  const korisnikJePrijavljen = () => {
+    return Boolean(localStorage.getItem('token'));
+  };
 
   const getVrednost = (obj, keys, fallback = '') => {
     for (const key of keys) {
@@ -222,6 +227,17 @@ function ProductDetails() {
   const dodajUKorpu = () => {
     if (!proizvod) return;
 
+    if (!korisnikJePrijavljen()) {
+      setTipPoruke('error');
+      setPoruka('Morate biti prijavljeni da biste dodali proizvod u korpu.');
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 1200);
+
+      return;
+    }
+
     const proizvodID = Number(
       getVrednost(proizvod, [
         'proizvodID',
@@ -244,8 +260,12 @@ function ProductDetails() {
       slikaUrl: slikaUrl ? formatirajSlikaUrl(slikaUrl) : '',
     });
 
+    setTipPoruke('success');
     setPoruka('Proizvod je dodat u korpu.');
-    setTimeout(() => setPoruka(''), 3000);
+
+    setTimeout(() => {
+      navigate('/cart');
+    }, 700);
   };
 
   const renderSpecijalizacija = () => {
@@ -311,7 +331,7 @@ function ProductDetails() {
     return (
       <main style={styles.page}>
         <p style={styles.greska}>{greska}</p>
-        <button style={styles.backBtn} onClick={() => navigate('/proizvodi')}>
+        <button style={styles.backBtn} onClick={() => navigate('/products')}>
           Nazad na proizvode
         </button>
       </main>
@@ -338,7 +358,12 @@ function ProductDetails() {
       </button>
 
       {poruka && (
-        <div style={styles.poruka}>
+        <div
+          style={{
+            ...styles.poruka,
+            ...(tipPoruke === 'error' ? styles.porukaError : {})
+          }}
+        >
           {poruka}
         </div>
       )}
@@ -430,6 +455,10 @@ const styles = {
     borderRadius: '10px',
     marginBottom: '20px',
     fontWeight: '700',
+  },
+  porukaError: {
+    backgroundColor: '#fee2e2',
+    color: '#991b1b',
   },
   card: {
     display: 'grid',

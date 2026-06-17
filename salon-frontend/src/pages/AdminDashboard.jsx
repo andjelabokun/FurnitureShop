@@ -96,6 +96,19 @@ function AdminDashboard() {
 
   const [noviProizvod, setNoviProizvod] = useState(pocetniProizvod);
 
+  const BROJ_PO_STRANI = 5;
+
+  const [stranice, setStranice] = useState({
+    porudzbine: 1,
+    proizvodi: 1,
+    kategorije: 1,
+    podkategorije: 1,
+    boje: 1,
+    materijali: 1,
+    dimenzije: 1,
+    proizvodjaci: 1
+  });
+
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
@@ -136,6 +149,42 @@ function AdminDashboard() {
       }
     }
     return fallback;
+  };
+
+  const izvuciPorukuGreske = (err, fallback) => {
+    const data = err.response?.data;
+
+    if (typeof data === 'string') {
+      return data;
+    }
+
+    if (data?.message) {
+      return data.message;
+    }
+
+    if (data?.title) {
+      return data.title;
+    }
+
+    if (data?.errors) {
+      return 'Podaci nisu ispravni.';
+    }
+
+    return fallback;
+  };
+
+  const porukaJeGreska = (tekst) => {
+    const malaSlova = String(tekst).toLowerCase();
+
+    return (
+      malaSlova.includes('greška') ||
+      malaSlova.includes('greska') ||
+      malaSlova.includes('ne možete') ||
+      malaSlova.includes('ne može') ||
+      malaSlova.includes('ne moze') ||
+      malaSlova.includes('mora') ||
+      malaSlova.includes('nije prona')
+    );
   };
 
   const getNaziv = (obj) => {
@@ -423,6 +472,11 @@ function AdminDashboard() {
       } catch (err) {
         poslednjaGreska = err;
         console.log(`Ne radi POST ruta ${ruta}:`, err.response?.status);
+
+        const status = err.response?.status;
+        if (status && status !== 404 && status !== 405) {
+          throw err;
+        }
       }
     }
 
@@ -438,6 +492,11 @@ function AdminDashboard() {
       } catch (err) {
         poslednjaGreska = err;
         console.log(`Ne radi PUT ruta ${ruta}:`, err.response?.status);
+
+        const status = err.response?.status;
+        if (status && status !== 404 && status !== 405) {
+          throw err;
+        }
       }
     }
 
@@ -453,6 +512,12 @@ function AdminDashboard() {
       } catch (err) {
         poslednjaGreska = err;
         console.log(`Ne radi DELETE ruta ${ruta}:`, err.response?.status);
+
+        const status = err.response?.status;
+
+        if (status && status !== 404 && status !== 405) {
+          throw err;
+        }
       }
     }
 
@@ -469,7 +534,7 @@ function AdminDashboard() {
     const bojeData = await ucitajSaMogucimRutama(['/Boje']);
     const materijaliData = await ucitajSaMogucimRutama([
       '/Materijal',
-      '/Materijal'
+      '/Materijali'
     ]);
     const dimenzijeData = await ucitajSaMogucimRutama(['/Dimenzije']);
     const proizvodjaciData = await ucitajSaMogucimRutama([
@@ -516,7 +581,8 @@ function AdminDashboard() {
     } catch (err) {
       console.log('STATUS:', err.response?.status);
       console.log('DATA:', err.response?.data);
-      setPoruka('Greška pri promeni statusa.');
+      setPoruka(izvuciPorukuGreske(err, 'Greška pri promeni statusa.'));
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -537,7 +603,13 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log('Greška pri brisanju porudžbine:', err.response?.data || err.message);
-      setPoruka('Greška pri brisanju porudžbine. Proverite da li backend ima DELETE rutu.');
+      setPoruka(
+        izvuciPorukuGreske(
+          err,
+          'Greška pri brisanju porudžbine. Proverite da li backend ima DELETE rutu.'
+        )
+      );
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -552,7 +624,15 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log('Greška:', err.response?.data || err.message);
-      setPoruka('Greška pri brisanju proizvoda.');
+
+      setPoruka(
+        izvuciPorukuGreske(
+          err,
+          'Proizvod ne može biti obrisan jer se nalazi u nekoj porudžbini.'
+        )
+      );
+
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -613,7 +693,8 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log('Greška pri čuvanju kategorije:', err.response?.data || err.message);
-      setPoruka('Greška pri čuvanju kategorije.');
+      setPoruka(izvuciPorukuGreske(err, 'Greška pri čuvanju kategorije.'));
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -639,7 +720,15 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log('Greška pri brisanju kategorije:', err.response?.data || err.message);
-      setPoruka('Ne možete obrisati kategoriju ako ima podkategorije ili proizvode.');
+
+      setPoruka(
+        izvuciPorukuGreske(
+          err,
+          'Ne možete obrisati kategoriju ako ima podkategorije ili proizvode.'
+        )
+      );
+
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -672,7 +761,8 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log('Greška pri čuvanju podkategorije:', err.response?.data || err.message);
-      setPoruka('Greška pri čuvanju podkategorije.');
+      setPoruka(izvuciPorukuGreske(err, 'Greška pri čuvanju podkategorije.'));
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -696,7 +786,15 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log('Greška pri brisanju podkategorije:', err.response?.data || err.message);
-      setPoruka('Ne možete obrisati podkategoriju ako ima proizvode.');
+
+      setPoruka(
+        izvuciPorukuGreske(
+          err,
+          'Ne možete obrisati podkategoriju ako ima proizvode.'
+        )
+      );
+
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -704,7 +802,7 @@ function AdminDashboard() {
     const configs = {
       boje: {
         naslov: 'Boje',
-        jednina: 'boja',
+        jednina: 'boju',
         rute: ['/Boje'],
         lista: boje,
         getId: getBojaId,
@@ -719,7 +817,7 @@ function AdminDashboard() {
       materijali: {
         naslov: 'Materijali',
         jednina: 'materijal',
-        rute: ['/Materijal', '/Materijal'],
+        rute: ['/Materijal', '/Materijali'],
         lista: materijali,
         getId: getMaterijalId,
         praznaForma: pocetneHelperForme().materijali,
@@ -752,7 +850,7 @@ function AdminDashboard() {
       },
       proizvodjaci: {
         naslov: 'Proizvođači',
-        jednina: 'proizvođač',
+        jednina: 'proizvođača',
         rute: ['/Proizvodjaci', '/Proizvodjac'],
         lista: proizvodjaci,
         getId: getProizvodjacId,
@@ -876,7 +974,8 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log(`Greška pri čuvanju ${tip}:`, err.response?.data || err.message);
-      setPoruka(`Greška pri čuvanju: ${config.naslov}.`);
+      setPoruka(izvuciPorukuGreske(err, `Greška pri čuvanju: ${config.naslov}.`));
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -941,7 +1040,15 @@ function AdminDashboard() {
       setTimeout(() => setPoruka(''), 3000);
     } catch (err) {
       console.log(`Greška pri brisanju ${tip}:`, err.response?.data || err.message);
-      setPoruka(`Ne možete obrisati ${config.jednina} ako je povezan sa proizvodima.`);
+
+      setPoruka(
+        izvuciPorukuGreske(
+          err,
+          `Ne možete obrisati ${config.jednina} ako je povezan sa proizvodima.`
+        )
+      );
+
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -1097,7 +1204,8 @@ function AdminDashboard() {
       setPoruka('');
     } catch (err) {
       console.log('Greška pri pripremi izmene:', err.response?.data || err.message);
-      setPoruka('Greška pri učitavanju proizvoda za izmenu.');
+      setPoruka(izvuciPorukuGreske(err, 'Greška pri učitavanju proizvoda za izmenu.'));
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -1178,7 +1286,8 @@ function AdminDashboard() {
     } catch (err) {
       console.log('STATUS:', err.response?.status);
       console.log('DATA:', err.response?.data);
-      setPoruka('Greška pri čuvanju proizvoda. Proverite podatke.');
+      setPoruka(izvuciPorukuGreske(err, 'Greška pri čuvanju proizvoda. Proverite podatke.'));
+      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -1206,6 +1315,82 @@ function AdminDashboard() {
     if (!noviProizvod.kategorijaId) return true;
     return String(getKategorijaIdIzPodkategorije(p)) === String(noviProizvod.kategorijaId);
   });
+
+  const paginiraj = (lista, tip) => {
+    const ukupnoStrana = Math.max(1, Math.ceil(lista.length / BROJ_PO_STRANI));
+    const trenutnaStrana = Math.min(stranice[tip] || 1, ukupnoStrana);
+
+    const pocetak = (trenutnaStrana - 1) * BROJ_PO_STRANI;
+    const kraj = pocetak + BROJ_PO_STRANI;
+
+    return lista.slice(pocetak, kraj);
+  };
+
+  const promeniStranicu = (tip, novaStrana, ukupnoElemenata) => {
+    const ukupnoStrana = Math.max(1, Math.ceil(ukupnoElemenata / BROJ_PO_STRANI));
+
+    if (novaStrana < 1 || novaStrana > ukupnoStrana) {
+      return;
+    }
+
+    setStranice(prev => ({
+      ...prev,
+      [tip]: novaStrana
+    }));
+  };
+
+  const renderPaginacija = (tip, ukupnoElemenata) => {
+    const ukupnoStrana = Math.ceil(ukupnoElemenata / BROJ_PO_STRANI);
+
+    if (ukupnoStrana <= 1) {
+      return null;
+    }
+
+    const trenutnaStrana = Math.min(stranice[tip] || 1, ukupnoStrana);
+
+    return (
+      <div style={styles.paginacija}>
+        <button
+          style={{
+            ...styles.pageBtn,
+            ...(trenutnaStrana === 1 ? styles.pageBtnDisabled : {})
+          }}
+          disabled={trenutnaStrana === 1}
+          onClick={() => promeniStranicu(tip, trenutnaStrana - 1, ukupnoElemenata)}
+        >
+          Prethodna
+        </button>
+
+        {Array.from({ length: ukupnoStrana }, (_, index) => {
+          const brojStrane = index + 1;
+
+          return (
+            <button
+              key={brojStrane}
+              style={{
+                ...styles.pageBtn,
+                ...(trenutnaStrana === brojStrane ? styles.pageBtnAktivan : {})
+              }}
+              onClick={() => promeniStranicu(tip, brojStrane, ukupnoElemenata)}
+            >
+              {brojStrane}
+            </button>
+          );
+        })}
+
+        <button
+          style={{
+            ...styles.pageBtn,
+            ...(trenutnaStrana === ukupnoStrana ? styles.pageBtnDisabled : {})
+          }}
+          disabled={trenutnaStrana === ukupnoStrana}
+          onClick={() => promeniStranicu(tip, trenutnaStrana + 1, ukupnoElemenata)}
+        >
+          Sledeća
+        </button>
+      </div>
+    );
+  };
 
   const renderHelperSekcija = (tip) => {
     const config = getHelperConfig(tip);
@@ -1256,7 +1441,7 @@ function AdminDashboard() {
           </thead>
 
           <tbody>
-            {config.lista.map(item => (
+            {paginiraj(config.lista, tip).map(item => (
               <tr key={config.getId(item)} style={styles.tr}>
                 <td style={styles.td}>#{config.getId(item)}</td>
                 {config.kolone.map(kolona => (
@@ -1284,6 +1469,8 @@ function AdminDashboard() {
           </tbody>
         </table>
 
+        {renderPaginacija(tip, config.lista.length)}
+
         {config.lista.length === 0 && (
           <p style={styles.prazno}>Nema podataka.</p>
         )}
@@ -1295,7 +1482,16 @@ function AdminDashboard() {
     <main style={styles.page}>
       <h1 style={styles.title}>Admin Panel</h1>
 
-      {poruka && <div style={styles.poruka}>{poruka}</div>}
+      {poruka && (
+        <div
+          style={{
+            ...styles.poruka,
+            ...(porukaJeGreska(poruka) ? styles.porukaGreska : {})
+          }}
+        >
+          {poruka}
+        </div>
+      )}
 
       <div style={styles.tabovi}>
         <button
@@ -1373,7 +1569,7 @@ function AdminDashboard() {
             </thead>
 
             <tbody>
-              {porudzbine.map(p => {
+              {paginiraj(porudzbine, 'porudzbine').map(p => {
                 const porudzbinaId = getPorudzbinaId(p);
                 const datumVreme = getVrednost(p, ['datumVreme', 'DatumVreme', 'datum', 'Datum']);
                 const ukupanIznos = getVrednost(p, ['ukupanIznos', 'UkupanIznos'], 0);
@@ -1519,6 +1715,8 @@ function AdminDashboard() {
               })}
             </tbody>
           </table>
+
+          {renderPaginacija('porudzbine', porudzbine.length)}
 
           {porudzbine.length === 0 && (
             <p style={styles.prazno}>Nema porudžbina.</p>
@@ -1862,7 +2060,7 @@ function AdminDashboard() {
             </thead>
 
             <tbody>
-              {proizvodi.map(p => (
+              {paginiraj(proizvodi, 'proizvodi').map(p => (
                 <tr key={p.proizvodID} style={styles.tr}>
                   <td style={styles.td}>#{p.proizvodID}</td>
                   <td style={styles.td}>{p.naziv}</td>
@@ -1890,6 +2088,8 @@ function AdminDashboard() {
               ))}
             </tbody>
           </table>
+
+          {renderPaginacija('proizvodi', proizvodi.length)}
 
           {proizvodi.length === 0 && (
             <p style={styles.prazno}>Nema proizvoda.</p>
@@ -1959,7 +2159,7 @@ function AdminDashboard() {
             </thead>
 
             <tbody>
-              {kategorije.map(k => {
+              {paginiraj(kategorije, 'kategorije').map(k => {
                 const slika = getSlikaUrl(k);
 
                 return (
@@ -1999,6 +2199,8 @@ function AdminDashboard() {
               })}
             </tbody>
           </table>
+
+          {renderPaginacija('kategorije', kategorije.length)}
 
           {kategorije.length === 0 && (
             <p style={styles.prazno}>Nema kategorija.</p>
@@ -2074,7 +2276,7 @@ function AdminDashboard() {
             </thead>
 
             <tbody>
-              {podkategorije.map(pk => {
+              {paginiraj(podkategorije, 'podkategorije').map(pk => {
                 const kategorija = kategorije.find(k =>
                   String(getKategorijaId(k)) === String(getKategorijaIdIzPodkategorije(pk))
                 );
@@ -2109,6 +2311,8 @@ function AdminDashboard() {
             </tbody>
           </table>
 
+          {renderPaginacija('podkategorije', podkategorije.length)}
+
           {podkategorije.length === 0 && (
             <p style={styles.prazno}>Nema podkategorija.</p>
           )}
@@ -2141,6 +2345,10 @@ const styles = {
     borderRadius: "8px",
     marginBottom: "20px",
     fontSize: "15px",
+  },
+  porukaGreska: {
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
   },
   tabovi: {
     display: "flex",
@@ -2437,6 +2645,33 @@ const styles = {
     fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  paginacija: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "22px",
+    flexWrap: "wrap",
+  },
+  pageBtn: {
+    padding: "8px 12px",
+    border: "1px solid #cfe8ff",
+    borderRadius: "6px",
+    backgroundColor: "white",
+    color: "#102a43",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  pageBtnAktivan: {
+    backgroundColor: "#102a43",
+    color: "white",
+    border: "1px solid #102a43",
+  },
+  pageBtnDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
   },
   prazno: {
     textAlign: "center",
