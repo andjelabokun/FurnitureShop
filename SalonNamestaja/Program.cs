@@ -23,7 +23,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddOpenApi();
-builder.Services.AddHostedService<AutoPromenaStatusaPorudzbineService>();
+builder.Services.AddHostedService<BrisanjeStarihPorudzbinaService>();
 
 builder.Services.AddCors(options =>
 {
