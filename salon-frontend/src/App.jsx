@@ -12,6 +12,8 @@ import Cart from './pages/Cart';
 import AdminDashboard from './pages/AdminDashboard';
 import GoogleAuth from './pages/GoogleAuth';
 
+import AdminPorudzbine from './pages/AdminPorudzbine';
+import DetaljiPorudzbine from './pages/DetaljiPorudzbine';
 
 function App() {
   return (
@@ -20,16 +22,23 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
+
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetails />} />
+
         <Route path="/categories" element={<Categories />} />
         <Route path="/about" element={<About />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/google-auth" element={<GoogleAuth />} />
 
+        <Route path="/cart" element={<Cart />} />
+
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/porudzbine" element={<AdminPorudzbine />} />
+        <Route path="/admin/porudzbine/:id" element={<DetaljiPorudzbine />} />
+
+        <Route path="/google-auth" element={<GoogleAuth />} />
       </Routes>
     </>
   );

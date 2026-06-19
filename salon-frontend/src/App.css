@@ -8,7 +8,14 @@ html,
 body,
 #root {
   width: 100%;
+  max-width: none;
+  min-width: 100%;
   min-height: 100vh;
+}
+
+html,
+body {
+  overflow-x: hidden;
 }
 
 body {
@@ -18,10 +25,21 @@ body {
 
 a {
   text-decoration: none;
+  color: inherit;
 }
+
 .app,
 .container,
 main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Bitno za admin stranice da mogu da koriste celu širinu */
+.admin-page,
+.admin-orders-page {
   width: 100%;
   max-width: none;
   margin: 0;

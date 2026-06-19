@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -55,11 +55,9 @@ function AdminDashboard() {
     }
   });
 
-  const [aktivnaTabela, setAktivnaTabela] = useState('porudzbine');
-  const [porudzbine, setPorudzbine] = useState([]);
+  const [aktivnaTabela, setAktivnaTabela] = useState('proizvodi');
   const [proizvodi, setProizvodi] = useState([]);
   const [poruka, setPoruka] = useState('');
-  const [otvorenePorudzbine, setOtvorenePorudzbine] = useState({});
 
   const [prikaziFormu, setPrikaziFormu] = useState(false);
   const [proizvodZaIzmenuId, setProizvodZaIzmenuId] = useState(null);
@@ -99,7 +97,6 @@ function AdminDashboard() {
   const BROJ_PO_STRANI = 5;
 
   const [stranice, setStranice] = useState({
-    porudzbine: 1,
     proizvodi: 1,
     kategorije: 1,
     podkategorije: 1,
@@ -122,15 +119,8 @@ function AdminDashboard() {
       return;
     }
 
-    ucitajPorudzbine();
     ucitajProizvode();
     ucitajPomocnePodatke();
-
-    const interval = setInterval(() => {
-      ucitajPorudzbine();
-    }, 3000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const getId = (obj, keys) => {
@@ -259,152 +249,6 @@ function AdminDashboard() {
       'ProizvodjacId',
       'Id'
     ]);
-  };
-
-  const getPorudzbinaId = (p) => {
-    return getId(p, [
-      'porudzbinaID',
-      'porudzbinaId',
-      'PorudzbinaID',
-      'PorudzbinaId',
-      'id',
-      'Id'
-    ]);
-  };
-
-  const getKupacObj = (p) => {
-    return p?.kupac || p?.Kupac || p?.korisnik || p?.Korisnik || p?.user || p?.User || null;
-  };
-
-  const getKupacIme = (p) => {
-    const kupac = getKupacObj(p);
-
-    return (
-      getVrednost(p, ['kupacIme', 'KupacIme', 'imeKupca', 'ImeKupca']) ||
-      getVrednost(kupac, ['ime', 'Ime']) ||
-      ''
-    );
-  };
-
-  const getKupacPrezime = (p) => {
-    const kupac = getKupacObj(p);
-
-    return (
-      getVrednost(p, ['kupacPrezime', 'KupacPrezime', 'prezimeKupca', 'PrezimeKupca']) ||
-      getVrednost(kupac, ['prezime', 'Prezime']) ||
-      ''
-    );
-  };
-
-  const getKupacEmail = (p) => {
-    const kupac = getKupacObj(p);
-
-    return (
-      getVrednost(p, ['kupacEmail', 'KupacEmail', 'emailKupca', 'EmailKupca']) ||
-      getVrednost(kupac, ['email', 'Email', 'userName', 'UserName']) ||
-      ''
-    );
-  };
-
-  const getKupacTelefon = (p) => {
-    const kupac = getKupacObj(p);
-
-    return (
-      getVrednost(p, ['kupacTelefon', 'KupacTelefon', 'telefonKupca', 'TelefonKupca']) ||
-      getVrednost(kupac, ['telefon', 'Telefon', 'phoneNumber', 'PhoneNumber']) ||
-      ''
-    );
-  };
-
-  const getKupacAdresa = (p) => {
-    const kupac = getKupacObj(p);
-
-    return (
-      getVrednost(p, [
-        'adresa',
-        'Adresa',
-        'adresaIsporuke',
-        'AdresaIsporuke',
-        'adresaKupca',
-        'AdresaKupca'
-      ]) ||
-      getVrednost(kupac, ['adresaIsporuke', 'AdresaIsporuke', 'adresa', 'Adresa']) ||
-      ''
-    );
-  };
-
-  const getStavke = (p) => {
-    const stavke = getVrednost(p, [
-      'stavke',
-      'Stavke',
-      'stavkePorudzbine',
-      'StavkePorudzbine'
-    ]);
-
-    return Array.isArray(stavke) ? stavke : [];
-  };
-
-  const getStavkaProizvodId = (stavka) => {
-    return getId(stavka, [
-      'proizvodID',
-      'proizvodId',
-      'ProizvodID',
-      'ProizvodId'
-    ]);
-  };
-
-  const getStavkaNaziv = (stavka) => {
-    const proizvod = getVrednost(stavka, ['proizvod', 'Proizvod'], null);
-    const proizvodId = getStavkaProizvodId(stavka);
-
-    const proizvodIzListe = proizvodi.find(p =>
-      String(getId(p, [
-        'proizvodID',
-        'proizvodId',
-        'ProizvodID',
-        'ProizvodId'
-      ])) === String(proizvodId)
-    );
-
-    return (
-      getVrednost(stavka, [
-        'proizvodNaziv',
-        'ProizvodNaziv',
-        'nazivProizvoda',
-        'NazivProizvoda',
-        'naziv',
-        'Naziv'
-      ]) ||
-      getNaziv(proizvod) ||
-      getNaziv(proizvodIzListe) ||
-      (proizvodId ? `Proizvod #${proizvodId}` : 'Proizvod')
-    );
-  };
-
-  const getStavkaKolicina = (stavka) => {
-    return getVrednost(stavka, ['kolicina', 'Kolicina'], 1);
-  };
-
-  const getStavkaCena = (stavka) => {
-    return getVrednost(stavka, [
-      'cena',
-      'Cena',
-      'cenaPoKomadu',
-      'CenaPoKomadu',
-      'jedinicnaCena',
-      'JedinicnaCena'
-    ], '');
-  };
-
-  const getStavkaIznos = (stavka) => {
-    return getVrednost(stavka, ['iznos', 'Iznos'], '');
-  };
-
-  const toggleStavke = (porudzbinaId) => {
-    setOtvorenePorudzbine(prev => ({
-      ...prev,
-      [porudzbinaId]: !prev[porudzbinaId]
-    }));
   };
 
   const formatirajSlikaUrl = (url) => {
@@ -550,66 +394,12 @@ function AdminDashboard() {
     setProizvodjaci(proizvodjaciData);
   };
 
-  const ucitajPorudzbine = async () => {
-    try {
-      const res = await api.get('/Porudzbine');
-      setPorudzbine(res.data);
-    } catch (err) {
-      console.log('Greška pri učitavanju porudžbina:', err.response?.data || err.message);
-    }
-  };
-
   const ucitajProizvode = async () => {
     try {
       const res = await api.get('/Proizvodi');
       setProizvodi(res.data);
     } catch (err) {
       console.log('Greška pri učitavanju proizvoda:', err.response?.data || err.message);
-    }
-  };
-
-  const promeniStatus = async (id, noviStatus) => {
-    try {
-      await api.put(`/Porudzbine/${id}/status`, {
-        status: noviStatus,
-        ukupanIznos: 0
-      });
-
-      setPoruka('Status uspešno promenjen!');
-      ucitajPorudzbine();
-      setTimeout(() => setPoruka(''), 3000);
-    } catch (err) {
-      console.log('STATUS:', err.response?.status);
-      console.log('DATA:', err.response?.data);
-      setPoruka(izvuciPorukuGreske(err, 'Greška pri promeni statusa.'));
-      setTimeout(() => setPoruka(''), 5000);
-    }
-  };
-
-  const obrisiPorudzbinu = async (id) => {
-    if (!window.confirm('Da li ste sigurni da želite da obrišete ovu porudžbinu?')) return;
-
-    try {
-      await api.delete(`/Porudzbine/${id}`);
-
-      setOtvorenePorudzbine(prev => {
-        const kopija = { ...prev };
-        delete kopija[id];
-        return kopija;
-      });
-
-      setPoruka('Porudžbina uspešno obrisana!');
-      ucitajPorudzbine();
-      setTimeout(() => setPoruka(''), 3000);
-    } catch (err) {
-      console.log('Greška pri brisanju porudžbine:', err.response?.data || err.message);
-      setPoruka(
-        izvuciPorukuGreske(
-          err,
-          'Greška pri brisanju porudžbine. Proverite da li backend ima DELETE rutu.'
-        )
-      );
-      setTimeout(() => setPoruka(''), 5000);
     }
   };
 
@@ -1493,14 +1283,16 @@ function AdminDashboard() {
         </div>
       )}
 
-      <div style={styles.tabovi}>
+      <div style={styles.adminActions}>
         <button
-          style={{ ...styles.tab, ...(aktivnaTabela === 'porudzbine' ? styles.tabAktivan : {}) }}
-          onClick={() => setAktivnaTabela('porudzbine')}
+          style={styles.porudzbineLinkBtn}
+          onClick={() => navigate('/admin/porudzbine')}
         >
-          Porudžbine ({porudzbine.length})
+          Otvori porudžbine
         </button>
+      </div>
 
+      <div style={styles.tabovi}>
         <button
           style={{ ...styles.tab, ...(aktivnaTabela === 'proizvodi' ? styles.tabAktivan : {}) }}
           onClick={() => setAktivnaTabela('proizvodi')}
@@ -1550,179 +1342,6 @@ function AdminDashboard() {
           Proizvođači ({proizvodjaci.length})
         </button>
       </div>
-
-      {aktivnaTabela === 'porudzbine' && (
-        <div style={{ ...styles.tabela, ...styles.tabelaPorudzbine }}>
-          <table style={{ ...styles.table, ...styles.porudzbineTable }}>
-            <thead>
-              <tr style={styles.thead}>
-                <th style={styles.th}>ID</th>
-                <th style={styles.th}>Datum</th>
-                <th style={styles.th}>Kupac</th>
-                <th style={styles.th}>Email</th>
-                <th style={styles.th}>Telefon</th>
-                <th style={styles.th}>Adresa</th>
-                <th style={styles.th}>Iznos</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.th}>Akcija</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginiraj(porudzbine, 'porudzbine').map(p => {
-                const porudzbinaId = getPorudzbinaId(p);
-                const datumVreme = getVrednost(p, ['datumVreme', 'DatumVreme', 'datum', 'Datum']);
-                const ukupanIznos = getVrednost(p, ['ukupanIznos', 'UkupanIznos'], 0);
-                const status = getVrednost(p, ['status', 'Status'], 'Kreirana');
-
-                const kupacIme = getKupacIme(p);
-                const kupacPrezime = getKupacPrezime(p);
-                const kupacEmail = getKupacEmail(p);
-                const kupacTelefon = getKupacTelefon(p);
-                const kupacAdresa = getKupacAdresa(p);
-                const stavke = getStavke(p);
-                const stavkeOtvorene = Boolean(otvorenePorudzbine[porudzbinaId]);
-
-                return (
-                  <Fragment key={porudzbinaId}>
-                    <tr style={styles.tr}>
-                      <td style={styles.td}>#{porudzbinaId}</td>
-
-                      <td style={styles.td}>
-                        {datumVreme ? new Date(datumVreme).toLocaleDateString('sr-RS') : '-'}
-                      </td>
-
-                      <td style={{ ...styles.td, ...styles.kupacCell }}>
-                        {kupacIme || kupacPrezime
-                          ? `${kupacIme} ${kupacPrezime}`.trim()
-                          : '-'}
-                      </td>
-
-                      <td style={{ ...styles.td, ...styles.emailCell }}>
-                        {kupacEmail || '-'}
-                      </td>
-
-                      <td style={{ ...styles.td, ...styles.telefonCell }}>
-                        {kupacTelefon || '-'}
-                      </td>
-
-                      <td style={{ ...styles.td, ...styles.adresaCell }}>
-                        {kupacAdresa || '-'}
-                      </td>
-
-                      <td style={styles.td}>
-                        {Number(ukupanIznos).toLocaleString()} RSD
-                      </td>
-
-                      <td style={styles.td}>
-                        <span
-                          style={{
-                            ...styles.statusBadge,
-                            backgroundColor: statusBoja(status),
-                            color: statusTextBoja(status)
-                          }}
-                        >
-                          {status}
-                        </span>
-                      </td>
-
-                      <td style={styles.td}>
-                        <div style={styles.akcijePorudzbine}>
-                          <button
-                            style={styles.editBtn}
-                            onClick={() => toggleStavke(porudzbinaId)}
-                          >
-                            {stavkeOtvorene ? 'Sakrij stavke' : 'Stavke'}
-                          </button>
-
-                          <select
-                            style={styles.statusSelect}
-                            value={status}
-                            onChange={(e) => promeniStatus(porudzbinaId, e.target.value)}
-                          >
-                            <option value="Kreirana">Kreirana</option>
-                            <option value="U obradi">U obradi</option>
-                            <option value="Isporucena">Isporucena</option>
-                            <option value="Otkazana">Otkazana</option>
-                          </select>
-
-                          <button
-                            style={styles.deleteBtn}
-                            onClick={() => obrisiPorudzbinu(porudzbinaId)}
-                          >
-                            Obriši
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-
-                    {stavkeOtvorene && (
-                      <tr style={styles.stavkeRed}>
-                        <td colSpan="9" style={styles.stavkeTd}>
-                          <div style={styles.stavkeBox}>
-                            <h4 style={styles.stavkeNaslov}>
-                              Stavke porudžbine #{porudzbinaId}
-                            </h4>
-
-                            {stavke.length > 0 ? (
-                              <table style={styles.stavkeTabela}>
-                                <thead>
-                                  <tr>
-                                    <th style={styles.stavkeTh}>Proizvod</th>
-                                    <th style={styles.stavkeTh}>Količina</th>
-                                    <th style={styles.stavkeTh}>Cena po komadu</th>
-                                    <th style={styles.stavkeTh}>Iznos</th>
-                                  </tr>
-                                </thead>
-
-                                <tbody>
-                                  {stavke.map((stavka, index) => {
-                                    const naziv = getStavkaNaziv(stavka);
-                                    const kolicina = getStavkaKolicina(stavka);
-                                    const cena = getStavkaCena(stavka);
-                                    const iznos = getStavkaIznos(stavka);
-
-                                    return (
-                                      <tr key={index}>
-                                        <td style={styles.stavkeTdMali}>{naziv}</td>
-                                        <td style={styles.stavkeTdMali}>{kolicina} kom</td>
-                                        <td style={styles.stavkeTdMali}>
-                                          {cena !== '' && cena !== null && cena !== undefined
-                                            ? `${Number(cena).toLocaleString()} RSD`
-                                            : '-'}
-                                        </td>
-                                        <td style={styles.stavkeTdMali}>
-                                          {iznos !== '' && iznos !== null && iznos !== undefined
-                                            ? `${Number(iznos).toLocaleString()} RSD`
-                                            : '-'}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            ) : (
-                              <p style={styles.praznoStavke}>
-                                Nema učitanih stavki za ovu porudžbinu.
-                              </p>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {renderPaginacija('porudzbine', porudzbine.length)}
-
-          {porudzbine.length === 0 && (
-            <p style={styles.prazno}>Nema porudžbina.</p>
-          )}
-        </div>
-      )}
 
       {aktivnaTabela === 'proizvodi' && (
         <div style={styles.tabela}>
@@ -2349,6 +1968,22 @@ const styles = {
   porukaGreska: {
     backgroundColor: "#fee2e2",
     color: "#991b1b",
+  },
+  adminActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginBottom: "18px",
+  },
+  porudzbineLinkBtn: {
+    padding: "12px 22px",
+    border: "none",
+    borderRadius: "8px",
+    backgroundColor: "#102a43",
+    color: "white",
+    fontSize: "15px",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxShadow: "0 4px 12px rgba(16,42,67,0.18)",
   },
   tabovi: {
     display: "flex",
