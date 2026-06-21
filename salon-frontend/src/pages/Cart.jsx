@@ -8,6 +8,7 @@ let listeners = [];
 
 export const korpa = {
   getItems: () => korpaState,
+  
   addItem: (proizvod) => {
     const postojeci = korpaState.find(k => k.proizvodID === proizvod.proizvodID);
     if (postojeci) {
@@ -82,7 +83,6 @@ function Cart() {
 
   const handlePorudzbina = async () => {
     try {
-      // prvo ažuriraj profil korisnika
       await api.put('/Auth/update-profile', {
         telefon: forma.telefon,
         adresaIsporuke: forma.adresaIsporuke,
@@ -90,7 +90,6 @@ function Cart() {
         tipKupca: forma.tipKupca
       });
 
-      
       await api.post('/Porudzbine', {
         ukupanIznos: ukupno,
         applicationUserId: user?.userId,
@@ -105,8 +104,16 @@ function Cart() {
       setModalOtvoren(false);
       setUspesno(true);
       setGreska('');
-    } catch {
-      setGreska('Greška pri kreiranju porudžbine.');
+    } catch (err) {
+      const errors = err.response?.data?.errors;
+  let poruka = err.response?.data?.message || 'Greška pri kreiranju porudžbine.';
+
+  if (errors) {
+    poruka = Object.values(errors).flat().join(' ');
+  }
+
+  setGreska(poruka);
+  setModalOtvoren(false);
     }
 };
 

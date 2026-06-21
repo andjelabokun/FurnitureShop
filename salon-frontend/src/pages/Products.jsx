@@ -511,28 +511,39 @@ function Products() {
                   <p style={styles.price}>
                     {cena.toLocaleString()} RSD
                   </p>
-
+                  
                   <button
-                    style={styles.button}
-                    onClick={() => {
-                      if (!isLoggedIn()) {
-                        navigate('/login');
-                        return;
-                      }
+  style={{
+    ...styles.button,
+    opacity: getBroj(proizvod, ['stanjeNaLageru', 'StanjeNaLageru'], 0) === 0 ? 0.5 : 1,
+    cursor: getBroj(proizvod, ['stanjeNaLageru', 'StanjeNaLageru'], 0) === 0 ? 'not-allowed' : 'pointer'
+  }}
+  disabled={getBroj(proizvod, ['stanjeNaLageru', 'StanjeNaLageru'], 0) === 0}
+  onClick={() => {
+    if (!isLoggedIn()) {
+      navigate('/login');
+      return;
+    }
 
-                      korpa.addItem({
-                        proizvodID: Number(id),
-                        naziv,
-                        opis,
-                        cena,
-                        slikaUrl: slika
-                      });
+    const stanje = getBroj(proizvod, ['stanjeNaLageru', 'StanjeNaLageru'], 0);
+    if (stanje === 0) return;
 
-                      navigate('/cart');
-                    }}
-                  >
-                    Dodaj u korpu
-                  </button>
+    console.log('Dodajem u korpu:', { proizvodID: Number(id), naziv, cena, stanje }); // DODAJ OVO
+
+    korpa.addItem({
+      proizvodID: Number(id),
+      naziv,
+      opis,
+      cena,
+      slikaUrl: slika,
+      stanjeNaLageru: stanje
+    });
+
+    navigate('/cart');
+  }}
+>
+  {getBroj(proizvod, ['stanjeNaLageru', 'StanjeNaLageru'], 0) === 0 ? 'Nema na stanju' : 'Dodaj u korpu'}
+</button>
 
                   <button
                     style={{

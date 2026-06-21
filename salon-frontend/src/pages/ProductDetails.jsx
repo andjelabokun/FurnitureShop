@@ -98,7 +98,7 @@ function ProductDetails() {
         kategorijeData
       ] = await Promise.all([
         ucitajSaMogucimRutama(['/Boje']),
-        ucitajSaMogucimRutama(['/Materijali', '/Materijal']),
+        ucitajSaMogucimRutama(['/Materijal', '/Materijal']),
         ucitajSaMogucimRutama(['/Dimenzije']),
         ucitajSaMogucimRutama(['/Proizvodjaci', '/Proizvodjac']),
         ucitajSaMogucimRutama(['/PodKategorije', '/Podkategorije', '/Podkategorija']),
