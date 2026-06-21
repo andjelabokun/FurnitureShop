@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SalonNamestajaAPI.DTOs;
-using SalonNamestajaAPI.Features.Porudzbine.Commands;
-using SalonNamestajaAPI.Features.Porudzbine.Queries;
+using SalonNamestaja.Application.DTOs;
+using SalonNamestaja.Application.Features.Porudzbine.Commands;
+using SalonNamestaja.Application.Features.Porudzbine.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
@@ -42,8 +42,15 @@ public class PorudzbineController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(PorudzbinaCreateDto dto)
     {
-        var porudzbinaId = await _mediator.Send(new CreatePorudzbinaCommand(dto));
-        return Ok(new { porudzbinaId });
+        try
+        {
+            var porudzbinaId = await _mediator.Send(new CreatePorudzbinaCommand(dto));
+            return Ok(new { porudzbinaId });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [Authorize(Roles = "Admin")]

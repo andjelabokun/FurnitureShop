@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SalonNamestaja.Infrastructure.Identity;
-using SalonNamestajaAPI.DTOs.Auth;
+using SalonNamestaja.Application.DTOs.Auth;
 
 namespace SalonNamestajaAPI.Controllers
 {

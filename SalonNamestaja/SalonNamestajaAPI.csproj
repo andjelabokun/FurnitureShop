@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SalonNamestaja.Application\SalonNamestaja.Application.csproj" />
     <ProjectReference Include="..\SalonNamestaja.Domain\SalonNamestaja.Domain.csproj" />
     <ProjectReference Include="..\SalonNamestaja.Infrastructure\SalonNamestaja.Infrastructure.csproj" />
   </ItemGroup>

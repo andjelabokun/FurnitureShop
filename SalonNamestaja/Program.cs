@@ -11,16 +11,17 @@ using SalonNamestaja.Infrastructure.Data;
 using SalonNamestaja.Infrastructure.Identity;
 using Scalar.AspNetCore;
 using SalonNamestajaAPI.Services;
+using SalonNamestaja.Application.Features.PodKategorije.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    cfg.RegisterServicesFromAssembly(typeof(GetAllPodKategorijeQuery).Assembly));
 
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<GetAllPodKategorijeQuery>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddHostedService<BrisanjeStarihPorudzbinaService>();

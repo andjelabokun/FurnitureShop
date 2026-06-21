@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SalonNamestajaAPI.DTOs;
-using SalonNamestajaAPI.Features.Kategorije.Commands;
-using SalonNamestajaAPI.Features.Kategorije.Queries;
+using SalonNamestaja.Application.DTOs;
+using SalonNamestaja.Application.Features.Kategorije.Commands;
+using SalonNamestaja.Application.Features.Kategorije.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
