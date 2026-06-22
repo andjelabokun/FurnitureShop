@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SalonNamestaja.Infrastructure.Identity;
-using SalonNamestajaAPI.DTOs.Auth;
+using SalonNamestaja.Application.DTOs.Auth;
 
 namespace SalonNamestajaAPI.Controllers
 {
@@ -57,6 +59,60 @@ namespace SalonNamestajaAPI.Controllers
 
             var token = _jwtTokenService.GenerateToken(user);
             return Ok(new { token });
+        }
+
+        [Authorize]
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDto dto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return NotFound("Korisnik nije pronađen.");
+
+            user.Telefon = dto.Telefon;
+            user.AdresaIsporuke = dto.AdresaIsporuke;
+            user.PIB = dto.PIB;
+            user.TipKupca = dto.TipKupca;
+
+            await _userManager.UpdateAsync(user);
+            return Ok("Profil uspešno ažuriran.");
+        }
+
+        [HttpGet("google-login")]
+        public IActionResult GoogleLogin()
+        {
+            var redirectUrl = Url.Action("GoogleCallback", "Auth");
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+            return Challenge(properties, "Google");
+        }
+
+        [HttpGet("google-callback")]
+        public async Task<IActionResult> GoogleCallback()
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+                return Redirect("http://localhost:5173/login?error=google-failed");
+
+            var user = await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email)!);
+
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
+                    Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                    Ime = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "",
+                    Prezime = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? ""
+                };
+                await _userManager.CreateAsync(user);
+                await _userManager.AddToRoleAsync(user, "Kupac");
+                await _userManager.AddLoginAsync(user, info);
+            }
+
+            var token = await _jwtTokenService.GenerateToken(user);
+            return Redirect($"http://localhost:5173/google-auth?token={token}");
         }
     }
 }

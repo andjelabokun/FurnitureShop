@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SalonNamestajaAPI.DTOs;
-using SalonNamestajaAPI.Features.Materijali.Commands;
-using SalonNamestajaAPI.Features.Materijali.Queries;
+using SalonNamestaja.Application.DTOs;
+using SalonNamestaja.Application.Features.Materijali.Commands;
+using SalonNamestaja.Application.Features.Materijali.Queries;
 
 namespace SalonNamestajaAPI.Controllers;
 
@@ -60,11 +60,18 @@ public class MaterijalController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var obrisan = await _mediator.Send(new DeleteMaterijalCommand(id));
+        try
+        {
+            var obrisan = await _mediator.Send(new DeleteMaterijalCommand(id));
 
-        if (!obrisan)
-            return NotFound("Materijal nije pronađen.");
+            if (!obrisan)
+                return NotFound("Materijal nije pronađen.");
 
-        return Ok("Materijal uspešno obrisan.");
+            return Ok("Materijal uspešno obrisan.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

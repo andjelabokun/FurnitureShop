@@ -8,14 +8,13 @@ namespace SalonNamestaja.Domain.Repositories
     {
         IKategorijaRepository Kategorije { get; }
         IProizvodRepository Proizvodi { get; }
-        IRepository<Kupac> Kupci { get; }
-        IRepository<Prodavac> Prodavci { get; }
         IRepository<PodKategorija> PodKategorije { get; }
         IRepository<Boja> Boje { get; }
         IRepository<Materijal> Materijali { get; }
         IRepository<Proizvodjac> Proizvodjaci { get; }
-        IRepository<Porudzbina> Porudzbine { get; }
+        IPorudzbinaRepository Porudzbine { get; }
         IRepository<Dimenzije> Dimenzije { get; }
+        IRepository<StavkaPorudzbine> StavkePorudzbine { get; }
 
         int SaveChanges();
     }

@@ -9,8 +9,7 @@ namespace SalonNamestaja.Infrastructure.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<Kupac> Kupci { get; set; }
-        public DbSet<Prodavac> Prodavci { get; set; }
+        
         public DbSet<Kategorija> Kategorije { get; set; }
         public DbSet<PodKategorija> PodKategorije { get; set; }
         public DbSet<Proizvod> Proizvodi { get; set; }
@@ -24,7 +23,7 @@ namespace SalonNamestaja.Infrastructure.Data
         public DbSet<Proizvodjac> Proizvodjaci { get; set; }
         public DbSet<Porudzbina> Porudzbine { get; set; }
         public DbSet<StavkaPorudzbine> StavkePorudzbine { get; set; }
-        public DbSet<Dostava> Dostave { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,7 +43,12 @@ namespace SalonNamestaja.Infrastructure.Data
             modelBuilder.Entity<StavkaPorudzbine>()
                 .HasKey(s => s.StavkaPorudzbinaID);
 
-            
+            modelBuilder.Entity<Porudzbina>()
+                .HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(p => p.ApplicationUserId);
+
+
         }
     }
 }

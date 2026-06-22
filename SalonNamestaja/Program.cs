@@ -10,18 +10,21 @@ using SalonNamestaja.Infrastructure;
 using SalonNamestaja.Infrastructure.Data;
 using SalonNamestaja.Infrastructure.Identity;
 using Scalar.AspNetCore;
+using SalonNamestajaAPI.Services;
+using SalonNamestaja.Application.Features.PodKategorije.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    cfg.RegisterServicesFromAssembly(typeof(GetAllPodKategorijeQuery).Assembly));
 
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<GetAllPodKategorijeQuery>();
 
 builder.Services.AddOpenApi();
+builder.Services.AddHostedService<BrisanjeStarihPorudzbinaService>();
 
 builder.Services.AddCors(options =>
 {
@@ -60,6 +63,11 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
 });
 
 builder.Services.AddScoped<JwtTokenService>();
@@ -85,6 +93,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SalonNamestajaAPI.DTOs;
-using SalonNamestajaAPI.Features.Dimenzije.Commands;
-using SalonNamestajaAPI.Features.Dimenzije.Queries;
+using SalonNamestaja.Application.DTOs;
+using SalonNamestaja.Application.Features.Dimenzije.Commands;
+using SalonNamestaja.Application.Features.Dimenzije.Queries;
 
 namespace SalonNamestajaAPI.Controllers
 {
@@ -60,12 +60,19 @@ namespace SalonNamestajaAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var obrisana = await _mediator.Send(new DeleteDimenzijeCommand(id));
+            try
+            {
+                var obrisana = await _mediator.Send(new DeleteDimenzijeCommand(id));
 
-            if (!obrisana)
-                return NotFound("Dimenzija nije pronađena.");
+                if (!obrisana)
+                    return NotFound("Dimenzija nije pronađena.");
 
-            return Ok("Dimenzija uspešno obrisana.");
+                return Ok("Dimenzija uspešno obrisana.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

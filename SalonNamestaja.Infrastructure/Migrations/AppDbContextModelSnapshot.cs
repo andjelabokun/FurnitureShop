@@ -194,35 +194,6 @@ namespace SalonNamestaja.Infrastructure.Migrations
                     b.ToTable("Dimenzije");
                 });
 
-            modelBuilder.Entity("SalonNamestaja.Domain.Dostava", b =>
-                {
-                    b.Property<int>("DostavaID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DostavaID"));
-
-                    b.Property<double>("CenaDostave")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("DatumDostave")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PorudzbinaID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("DostavaID");
-
-                    b.HasIndex("PorudzbinaID")
-                        .IsUnique();
-
-                    b.ToTable("Dostave");
-                });
-
             modelBuilder.Entity("SalonNamestaja.Domain.Kategorija", b =>
                 {
                     b.Property<int>("KategorijaID")
@@ -241,41 +212,6 @@ namespace SalonNamestaja.Infrastructure.Migrations
                     b.HasKey("KategorijaID");
 
                     b.ToTable("Kategorije");
-                });
-
-            modelBuilder.Entity("SalonNamestaja.Domain.Kupac", b =>
-                {
-                    b.Property<int>("KupacID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KupacID"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Ime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PIB")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Prezime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Telefon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TipKupca")
-                        .HasColumnType("int");
-
-                    b.HasKey("KupacID");
-
-                    b.ToTable("Kupci");
                 });
 
             modelBuilder.Entity("SalonNamestaja.Domain.Materijal", b =>
@@ -329,14 +265,12 @@ namespace SalonNamestaja.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PorudzbinaID"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("DatumVreme")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("KupacID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProdavacID")
-                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -347,40 +281,9 @@ namespace SalonNamestaja.Infrastructure.Migrations
 
                     b.HasKey("PorudzbinaID");
 
-                    b.HasIndex("KupacID");
-
-                    b.HasIndex("ProdavacID");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Porudzbine");
-                });
-
-            modelBuilder.Entity("SalonNamestaja.Domain.Prodavac", b =>
-                {
-                    b.Property<int>("ProdavacID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProdavacID"));
-
-                    b.Property<string>("Ime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KorisnickoIme")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Lozinka")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Prezime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ProdavacID");
-
-                    b.ToTable("Prodavci");
                 });
 
             modelBuilder.Entity("SalonNamestaja.Domain.Proizvod", b =>
@@ -511,6 +414,9 @@ namespace SalonNamestaja.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("AdresaIsporuke")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -540,6 +446,9 @@ namespace SalonNamestaja.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<int?>("PIB")
+                        .HasColumnType("int");
+
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -554,6 +463,12 @@ namespace SalonNamestaja.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Telefon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TipKupca")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -706,17 +621,6 @@ namespace SalonNamestaja.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SalonNamestaja.Domain.Dostava", b =>
-                {
-                    b.HasOne("SalonNamestaja.Domain.Porudzbina", "Porudzbina")
-                        .WithOne("Dostava")
-                        .HasForeignKey("SalonNamestaja.Domain.Dostava", "PorudzbinaID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Porudzbina");
-                });
-
             modelBuilder.Entity("SalonNamestaja.Domain.PodKategorija", b =>
                 {
                     b.HasOne("SalonNamestaja.Domain.Kategorija", "Kategorija")
@@ -730,21 +634,11 @@ namespace SalonNamestaja.Infrastructure.Migrations
 
             modelBuilder.Entity("SalonNamestaja.Domain.Porudzbina", b =>
                 {
-                    b.HasOne("SalonNamestaja.Domain.Kupac", "Kupac")
-                        .WithMany("Porudzbine")
-                        .HasForeignKey("KupacID")
+                    b.HasOne("SalonNamestaja.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("SalonNamestaja.Domain.Prodavac", "Prodavac")
-                        .WithMany("Porudzbine")
-                        .HasForeignKey("ProdavacID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Kupac");
-
-                    b.Navigation("Prodavac");
                 });
 
             modelBuilder.Entity("SalonNamestaja.Domain.Proizvod", b =>
@@ -824,11 +718,6 @@ namespace SalonNamestaja.Infrastructure.Migrations
                     b.Navigation("Podkategorije");
                 });
 
-            modelBuilder.Entity("SalonNamestaja.Domain.Kupac", b =>
-                {
-                    b.Navigation("Porudzbine");
-                });
-
             modelBuilder.Entity("SalonNamestaja.Domain.Materijal", b =>
                 {
                     b.Navigation("Proizvodi");
@@ -841,15 +730,7 @@ namespace SalonNamestaja.Infrastructure.Migrations
 
             modelBuilder.Entity("SalonNamestaja.Domain.Porudzbina", b =>
                 {
-                    b.Navigation("Dostava")
-                        .IsRequired();
-
                     b.Navigation("StavkePorudzbine");
-                });
-
-            modelBuilder.Entity("SalonNamestaja.Domain.Prodavac", b =>
-                {
-                    b.Navigation("Porudzbine");
                 });
 
             modelBuilder.Entity("SalonNamestaja.Domain.Proizvod", b =>

@@ -11,14 +11,13 @@ namespace SalonNamestaja.Infrastructure
 
         private IKategorijaRepository? _kategorije;
         private IProizvodRepository? _proizvodi;
-        private IRepository<Kupac>? _kupci;
-        private IRepository<Prodavac>? _prodavci;
         private IRepository<PodKategorija>? _podKategorije;
         private IRepository<Boja>? _boje;
         private IRepository<Materijal>? _materijali;
         private IRepository<Proizvodjac>? _proizvodjaci;
-        private IRepository<Porudzbina>? _porudzbine;
+        private IPorudzbinaRepository? _porudzbine;
         private IRepository<Dimenzije>? _dimenzije;
+        private IRepository<StavkaPorudzbine>? _stavkePorudzbine;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -30,12 +29,6 @@ namespace SalonNamestaja.Infrastructure
 
         public IProizvodRepository Proizvodi =>
             _proizvodi ??= new ProizvodRepository(_context);
-
-        public IRepository<Kupac> Kupci =>
-            _kupci ??= new Repository<Kupac>(_context);
-
-        public IRepository<Prodavac> Prodavci =>
-            _prodavci ??= new Repository<Prodavac>(_context);
 
         public IRepository<PodKategorija> PodKategorije =>
             _podKategorije ??= new Repository<PodKategorija>(_context);
@@ -49,11 +42,14 @@ namespace SalonNamestaja.Infrastructure
         public IRepository<Proizvodjac> Proizvodjaci =>
             _proizvodjaci ??= new Repository<Proizvodjac>(_context);
 
-        public IRepository<Porudzbina> Porudzbine =>
-            _porudzbine ??= new Repository<Porudzbina>(_context);
+        public IPorudzbinaRepository Porudzbine =>
+     _porudzbine ??= new PorudzbinaRepository(_context);
 
         public IRepository<Dimenzije> Dimenzije =>
             _dimenzije ??= new Repository<Dimenzije>(_context);
+
+        public IRepository<StavkaPorudzbine> StavkePorudzbine =>
+            _stavkePorudzbine ??= new Repository<StavkaPorudzbine>(_context);
 
         public int SaveChanges() => _context.SaveChanges();
 
