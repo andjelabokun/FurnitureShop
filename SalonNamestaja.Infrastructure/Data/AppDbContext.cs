@@ -23,7 +23,7 @@ namespace SalonNamestaja.Infrastructure.Data
         public DbSet<Proizvodjac> Proizvodjaci { get; set; }
         public DbSet<Porudzbina> Porudzbine { get; set; }
         public DbSet<StavkaPorudzbine> StavkePorudzbine { get; set; }
-        public DbSet<Dostava> Dostave { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

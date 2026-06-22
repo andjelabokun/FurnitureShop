@@ -14,6 +14,6 @@ namespace SalonNamestaja.Domain
         public string ApplicationUserId { get; set; }   
 
         public ICollection<StavkaPorudzbine> StavkePorudzbine { get; set; }
-        public Dostava Dostava { get; set; }
+        
     }
 }
