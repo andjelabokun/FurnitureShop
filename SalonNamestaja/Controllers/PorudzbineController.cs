@@ -38,6 +38,20 @@ public class PorudzbineController : ControllerBase
         return Ok(porudzbina);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet("filter")]
+    public async Task<IActionResult> FilterPorudzbine(
+    [FromQuery] string? pretraga,
+    [FromQuery] string? status,
+    [FromQuery] DateTime? datumOd,
+    [FromQuery] DateTime? datumDo)
+    {
+        var porudzbine = await _mediator.Send(
+            new GetPorudzbineFilterQuery(pretraga, status, datumOd, datumDo));
+
+        return Ok(porudzbine);
+    }
+
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create(PorudzbinaCreateDto dto)
@@ -65,17 +79,7 @@ public class PorudzbineController : ControllerBase
         return Ok(porudzbina);
     }
 
-    [Authorize(Roles = "Admin")]
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, PorudzbinaCreateDto dto)
-    {
-        var porudzbina = await _mediator.Send(new UpdatePorudzbinaCommand(id, dto));
-
-        if (porudzbina == null)
-            return NotFound("Porudžbina nije pronađena.");
-
-        return Ok(porudzbina);
-    }
+    
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]

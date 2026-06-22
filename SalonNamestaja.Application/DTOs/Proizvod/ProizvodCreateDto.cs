@@ -15,10 +15,10 @@
 
         public string? SlikaUrl { get; set; }
 
-        // Specijalizacija proizvoda
+        
         public string TipProizvoda { get; set; } = "Proizvod";
 
-        // Garnitura
+        //Garnitura
         public string? Punjenje { get; set; }
         public string? Orijentacija { get; set; }
         public int? BrojMesta { get; set; }

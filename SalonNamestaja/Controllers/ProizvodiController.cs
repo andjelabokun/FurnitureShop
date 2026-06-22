@@ -50,6 +50,46 @@ namespace SalonNamestajaAPI.Controllers
             return Ok(proizvodi);
         }
 
+        [HttpGet("materijal/{materijalId}")]
+        public async Task<IActionResult> GetPoMaterijalu(int materijalId)
+        {
+            var proizvodi = await _mediator.Send(new GetProizvodiPoMaterijaluQuery(materijalId));
+            return Ok(proizvodi);
+        }
+
+        [HttpGet("podkategorija/{podKategorijaId}")]
+        public async Task<IActionResult> GetPoPodKategoriji(int podKategorijaId)
+        {
+            var proizvodi = await _mediator.Send(new GetProizvodiPoPodkategorijiQuery(podKategorijaId));
+            return Ok(proizvodi);
+        }
+
+        [HttpGet("kategorija/{kategorijaId}")]
+        public async Task<IActionResult> GetPoKategoriji(int kategorijaId)
+        {
+            var proizvodi = await _mediator.Send(new GetProizvodiPoKategorijiQuery(kategorijaId));
+            return Ok(proizvodi);
+        }
+
+        [HttpGet("cena/max/{maxCena}")]
+        public async Task<IActionResult> GetPoMaxCeni(double maxCena)
+        {
+            var proizvodi = await _mediator.Send(new GetProizvodiPoMaxCeniQuery(maxCena));
+            return Ok(proizvodi);
+        }
+
+        [HttpGet("dimenzije/filter")]
+        public async Task<IActionResult> GetPoDimenzijama(
+                          [FromQuery] double? maxSirina,
+                          [FromQuery] double? maxVisina,
+                          [FromQuery] double? maxDubina)
+        {
+            var proizvodi = await _mediator.Send(
+                new GetProizvodiPoDimenzijamaQuery(maxSirina, maxVisina, maxDubina));
+
+            return Ok(proizvodi);
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(ProizvodCreateDto dto)

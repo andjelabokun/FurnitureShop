@@ -15,7 +15,7 @@
 
         public string? SlikaUrl { get; set; }
 
-        // Specijalizacija proizvoda
+        
         public string TipProizvoda { get; set; } = "Proizvod";
 
         // Garnitura
